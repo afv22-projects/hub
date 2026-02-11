@@ -60,7 +60,7 @@ def add_source_to_recipe(id: int, source: str, db: Session = Depends(get_db)):
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
-    db_recipe.sources += [source]
+    db_recipe.sources = db_recipe.sources + [source]
     db.commit()
     return db_recipe
 
