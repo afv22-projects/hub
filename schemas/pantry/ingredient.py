@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict
 
 class IngredientBase(BaseModel):
     name: str
+    needed: bool
 
 
 class IngredientCreate(IngredientBase): ...
@@ -10,6 +11,7 @@ class IngredientCreate(IngredientBase): ...
 
 class IngredientUpdate(BaseModel):
     name: str | None
+    needed: bool | None
 
 
 class IngredientSchema(IngredientBase):

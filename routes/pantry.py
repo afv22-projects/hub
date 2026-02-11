@@ -24,6 +24,14 @@ def get_recipes(db: Session = Depends(get_db)):
     return db.query(RecipeModel).all()
 
 
+@router.get("/recipes/{id}", response_model=RecipeSchema)
+def get_recipe(id: int, db: Session = Depends(get_db)):
+    db_recipe = db.get(RecipeModel, id)
+    if not db_recipe:
+        raise HTTPException(404, f"Recipe not found (id: {id})")
+    return db_recipe
+
+
 @router.post("/recipes", response_model=RecipeSchema)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     db_recipe = RecipeModel(name=recipe.name, notes=recipe.notes)
@@ -129,6 +137,7 @@ def get_ingredients(db: Session = Depends(get_db)):
 def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db)):
     db_ingredient = IngredientModel(
         name=ingredient.name,
+        needed=ingredient.needed,
     )
     db.add(db_ingredient)
 
@@ -154,6 +163,8 @@ def update_ingredient(
 
     if ingredient.name is not None:
         db_ingredient.name = ingredient.name
+    if ingredient.needed is not None:
+        db_ingredient.needed = ingredient.needed
 
     try:
         db.commit()
