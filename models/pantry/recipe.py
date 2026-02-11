@@ -21,5 +21,9 @@ class Recipe(Base):
         secondary=recipe_ingredient_assoc, back_populates="recipes"
     )
 
+    @property
+    def ingredient_ids(self) -> list[int]:
+        return [ingredient.id for ingredient in self.ingredients]
+
     def __repr__(self) -> str:
         return f"{self.name} (id: {self.id})"

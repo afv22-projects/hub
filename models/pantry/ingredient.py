@@ -14,11 +14,15 @@ class Ingredient(Base):
     __tablename__ = "pantry--ingredient"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String)
+    name: Mapped[str] = mapped_column(String, unique=True)
 
     recipes: Mapped[list["Recipe"]] = relationship(
         secondary=recipe_ingredient_assoc, back_populates="ingredients"
     )
+
+    @property
+    def recipe_ids(self) -> list[int]:
+        return [recipe.id for recipe in self.recipes]
 
     def __repr__(self) -> str:
         return f"{self.name} (id: {self.id})"

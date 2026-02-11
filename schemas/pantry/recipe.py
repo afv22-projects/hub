@@ -6,7 +6,8 @@ class RecipeBase(BaseModel):
     notes: str
 
 
-class RecipeCreate(RecipeBase): ...
+class RecipeCreate(RecipeBase):
+    ingredients: list[str]
 
 
 class RecipeUpdate(BaseModel):
@@ -16,5 +17,6 @@ class RecipeUpdate(BaseModel):
 
 class RecipeSchema(RecipeBase):
     id: int
+    ingredient_ids: list[int] = []
 
     model_config = ConfigDict(from_attributes=True)

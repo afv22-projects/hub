@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db import get_db
@@ -25,13 +26,72 @@ def get_recipes(db: Session = Depends(get_db)):
 
 @router.post("/recipes", response_model=RecipeSchema)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
-    db_recipe = RecipeModel(
-        name=recipe.name,
-        notes=recipe.notes,
-    )
+    db_recipe = RecipeModel(name=recipe.name, notes=recipe.notes)
     db.add(db_recipe)
+
+    for ingredient in recipe.ingredients:
+        db_ingredient = (
+            db.query(IngredientModel).filter_by(name=ingredient).one_or_none()
+        )
+        if not db_ingredient:
+            db_ingredient = IngredientModel(name=ingredient)
+            db.add(db_ingredient)
+        db_recipe.ingredients.append(db_ingredient)
+
+    try:
+        db.commit()
+        db.refresh(db_recipe)
+        return db_recipe
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Failed to create recipe due to constraint violation",
+        )
+
+
+@router.post("/recipes/{id}/ingredients", response_model=RecipeSchema)
+def add_ingredient_to_recipe(id: int, name: str, db: Session = Depends(get_db)):
+    db_recipe = db.get(RecipeModel, id)
+    if not db_recipe:
+        raise HTTPException(404, f"Recipe not found (id: {id})")
+
+    db_ingredient = db.query(IngredientModel).filter_by(name=name).one_or_none()
+    if not db_ingredient:
+        db_ingredient = IngredientModel(name=name)
+        db.add(db_ingredient)
+
+    if db_ingredient not in db_recipe.ingredients:
+        db_recipe.ingredients.append(db_ingredient)
+
+    try:
+        db.commit()
+        db.refresh(db_recipe)
+        return db_recipe
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ingredient with name '{name}' already exists",
+        )
+
+
+@router.delete("/recipes/{id}/ingredients", response_model=RecipeSchema)
+def remove_ingredient_from_recipe(
+    id: int, ingredient: str, db: Session = Depends(get_db)
+):
+    db_recipe = db.get(RecipeModel, id)
+    if not db_recipe:
+        raise HTTPException(404, f"Recipe not found (id: {id})")
+
+    db_ingredient = db.query(IngredientModel).filter_by(name=ingredient).one_or_none()
+    if not db_ingredient:
+        raise HTTPException(404, f"Ingredient '{ingredient}' not found")
+
+    if db_ingredient in db_recipe.ingredients:
+        db_recipe.ingredients.remove(db_ingredient)
+
     db.commit()
-    db.refresh(db_recipe)
     return db_recipe
 
 
@@ -55,6 +115,7 @@ def delete_recipe(id: int, db: Session = Depends(get_db)):
     db_recipe = db.get(RecipeModel, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
+
     db.delete(db_recipe)
     db.commit()
 
@@ -70,9 +131,17 @@ def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db
         name=ingredient.name,
     )
     db.add(db_ingredient)
-    db.commit()
-    db.refresh(db_ingredient)
-    return db_ingredient
+
+    try:
+        db.commit()
+        db.refresh(db_ingredient)
+        return db_ingredient
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ingredient with name '{ingredient.name}' already exists",
+        )
 
 
 @router.patch("/ingredients/{id}", response_model=IngredientSchema)
@@ -86,8 +155,15 @@ def update_ingredient(
     if ingredient.name is not None:
         db_ingredient.name = ingredient.name
 
-    db.commit()
-    return db_ingredient
+    try:
+        db.commit()
+        return db_ingredient
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ingredient with name '{ingredient.name}' already exists",
+        )
 
 
 @router.delete("/ingredients/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -95,5 +171,6 @@ def delete_ingredient(id: int, db: Session = Depends(get_db)):
     db_ingredient = db.get(IngredientModel, id)
     if not db_ingredient:
         raise HTTPException(404, f"Ingredient not found (id: {id})")
+
     db.delete(db_ingredient)
     db.commit()
