@@ -134,6 +134,14 @@ def get_ingredients(db: Session = Depends(get_db)):
     return db.query(IngredientModel).all()
 
 
+@router.get("/ingredients/{id}", response_model=IngredientSchema)
+def get_ingredient(id: int, db: Session = Depends(get_db)):
+    db_ingredient = db.get(IngredientModel, id)
+    if not db_ingredient:
+        raise HTTPException(404, f"Ingredient not found (id: {id})")
+    return db_ingredient
+
+
 @router.post("/ingredients", response_model=IngredientSchema)
 def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db)):
     db_ingredient = IngredientModel(
