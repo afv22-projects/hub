@@ -1,1 +1,2 @@
-from .recipe import Recipe, RecipeCreate
+from .ingredient import IngredientSchema, IngredientCreate, IngredientUpdate
+from .recipe import RecipeSchema, RecipeCreate, RecipeUpdate

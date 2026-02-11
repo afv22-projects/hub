@@ -7,18 +7,17 @@ from models import Base
 from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
 
 if TYPE_CHECKING:
-    from models.pantry import Ingredient
+    from models.pantry import Recipe
 
 
-class Recipe(Base):
-    __tablename__ = "pantry--recipe"
+class Ingredient(Base):
+    __tablename__ = "pantry--ingredient"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String)
-    notes: Mapped[str] = mapped_column(String)
 
-    ingredients: Mapped[list["Ingredient"]] = relationship(
-        secondary=recipe_ingredient_assoc, back_populates="recipes"
+    recipes: Mapped[list["Recipe"]] = relationship(
+        secondary=recipe_ingredient_assoc, back_populates="ingredients"
     )
 
     def __repr__(self) -> str:
