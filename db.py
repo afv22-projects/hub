@@ -14,11 +14,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def init_db():
-    from models.second_thought import Justification
-
     Base.metadata.create_all(engine)
-
-    print("Tables in metadata:", Base.metadata.tables.keys())
 
 
 def get_db():

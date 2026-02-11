@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from db import init_db
-from routes import second_thought_router
+from routes import pantry_router, second_thought_router
 
 init_db()
 
@@ -27,6 +27,7 @@ def get_root():
     return {"msg": "Hello, World!"}
 
 
+app.include_router(pantry_router)
 app.include_router(second_thought_router)
 
 

@@ -7,7 +7,7 @@ from models import Base
 
 
 class Justification(Base):
-    __tablename__ = "second_thought_justification"
+    __tablename__ = "second_thought--justification"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     ts: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
