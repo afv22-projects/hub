@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict
 class RecipeBase(BaseModel):
     name: str
     notes: str
+    sources: list[str]
 
 
 class RecipeCreate(RecipeBase):
@@ -13,6 +14,7 @@ class RecipeCreate(RecipeBase):
 class RecipeUpdate(BaseModel):
     name: str | None = None
     notes: str | None = None
+    sources: list[str] | None = None
 
 
 class RecipeSchema(RecipeBase):

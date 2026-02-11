@@ -54,6 +54,30 @@ def remove_ingredient_from_recipe(
     return db_recipe
 
 
+@router.post("/{id}/sources", response_model=RecipeSchema)
+def add_source_to_recipe(id: int, source: str, db: Session = Depends(get_db)):
+    db_recipe = db.get(RecipeModel, id)
+    if not db_recipe:
+        raise HTTPException(404, f"Recipe not found (id: {id})")
+
+    db_recipe.sources += [source]
+    db.commit()
+    return db_recipe
+
+
+@router.delete("/{id}/sources", response_model=RecipeSchema)
+def remove_source_from_recipe(id: int, source: str, db: Session = Depends(get_db)):
+    db_recipe = db.get(RecipeModel, id)
+    if not db_recipe:
+        raise HTTPException(404, f"Recipe not found (id: {id})")
+
+    if source in db_recipe.sources:
+        db_recipe.sources = [src for src in db_recipe.sources if src != source]
+
+    db.commit()
+    return db_recipe
+
+
 @router.get("/{id}", response_model=RecipeSchema)
 def get_recipe(id: int, db: Session = Depends(get_db)):
     db_recipe = db.get(RecipeModel, id)
@@ -94,7 +118,11 @@ def get_recipes(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=RecipeSchema)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
-    db_recipe = RecipeModel(name=recipe.name, notes=recipe.notes)
+    db_recipe = RecipeModel(
+        name=recipe.name,
+        notes=recipe.notes,
+        sources=recipe.sources,
+    )
     db.add(db_recipe)
 
     for ingredient in recipe.ingredients:

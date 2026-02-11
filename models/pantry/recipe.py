@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import String, Integer
+from sqlalchemy.types import String, Integer, JSON
 
 from models import Base
 from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
@@ -16,6 +16,7 @@ class Recipe(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String)
     notes: Mapped[str] = mapped_column(String)
+    sources: Mapped[list[str]] = mapped_column(JSON, default=[])
 
     ingredients: Mapped[list["Ingredient"]] = relationship(
         secondary=recipe_ingredient_assoc, back_populates="recipes"
