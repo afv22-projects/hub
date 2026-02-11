@@ -27,6 +27,11 @@ def get_root():
     return {"msg": "Hello, World!"}
 
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+
 app.include_router(pantry_router)
 app.include_router(second_thought_router)
 
