@@ -111,12 +111,12 @@ def delete_recipe(id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-@router.get("/", response_model=list[RecipeSchema])
+@router.get("", response_model=list[RecipeSchema])
 def get_recipes(db: Session = Depends(get_db)):
     return db.query(RecipeModel).all()
 
 
-@router.post("/", response_model=RecipeSchema)
+@router.post("", response_model=RecipeSchema)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     db_recipe = RecipeModel(
         name=recipe.name,

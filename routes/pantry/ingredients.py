@@ -59,12 +59,12 @@ def delete_ingredient(id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-@router.get("/", response_model=list[IngredientSchema])
+@router.get("", response_model=list[IngredientSchema])
 def get_ingredients(db: Session = Depends(get_db)):
     return db.query(IngredientModel).all()
 
 
-@router.post("/", response_model=IngredientSchema)
+@router.post("", response_model=IngredientSchema)
 def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db)):
     db_ingredient = IngredientModel(
         name=ingredient.name,
