@@ -134,6 +134,12 @@ def get_ingredients(db: Session = Depends(get_db)):
     return db.query(IngredientModel).all()
 
 
+@router.get("/ingredients/categories", response_model=list[str])
+def get_categories():
+    """Get all available ingredient categories."""
+    return [category.value for category in IngredientCategory]
+
+
 @router.get("/ingredients/{id}", response_model=IngredientSchema)
 def get_ingredient(id: int, db: Session = Depends(get_db)):
     db_ingredient = db.get(IngredientModel, id)
@@ -197,9 +203,3 @@ def delete_ingredient(id: int, db: Session = Depends(get_db)):
 
     db.delete(db_ingredient)
     db.commit()
-
-
-@router.get("/ingredients/categories", response_model=list[str])
-def get_categories():
-    """Get all available ingredient categories."""
-    return [category.value for category in IngredientCategory]
