@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db import get_db
+from enums import IngredientCategory
 from models.pantry import (
     Ingredient as IngredientModel,
     Recipe as RecipeModel,
@@ -138,6 +139,7 @@ def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db
     db_ingredient = IngredientModel(
         name=ingredient.name,
         needed=ingredient.needed,
+        category=ingredient.category,
     )
     db.add(db_ingredient)
 
@@ -165,6 +167,8 @@ def update_ingredient(
         db_ingredient.name = ingredient.name
     if ingredient.needed is not None:
         db_ingredient.needed = ingredient.needed
+    if ingredient.category is not None:
+        db_ingredient.category = ingredient.category
 
     try:
         db.commit()
@@ -185,3 +189,9 @@ def delete_ingredient(id: int, db: Session = Depends(get_db)):
 
     db.delete(db_ingredient)
     db.commit()
+
+
+@router.get("/ingredients/categories", response_model=list[str])
+def get_categories():
+    """Get all available ingredient categories."""
+    return [category.value for category in IngredientCategory]

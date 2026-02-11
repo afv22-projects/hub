@@ -11,8 +11,8 @@ class RecipeCreate(RecipeBase):
 
 
 class RecipeUpdate(BaseModel):
-    name: str | None
-    notes: str | None
+    name: str | None = None
+    notes: str | None = None
 
 
 class RecipeSchema(RecipeBase):

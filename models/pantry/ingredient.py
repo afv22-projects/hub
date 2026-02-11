@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import Boolean, String, Integer
+from sqlalchemy.types import Boolean, String, Integer, Enum as SQLEnum
 
 from models import Base
 from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
+from enums import IngredientCategory
 
 if TYPE_CHECKING:
     from models.pantry import Recipe
@@ -16,6 +17,9 @@ class Ingredient(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, unique=True)
     needed: Mapped[bool] = mapped_column(Boolean, default=False)
+    category: Mapped[IngredientCategory] = mapped_column(
+        SQLEnum(IngredientCategory), nullable=False, default=IngredientCategory.OTHER
+    )
 
     recipes: Mapped[list["Recipe"]] = relationship(
         secondary=recipe_ingredient_assoc, back_populates="ingredients"
