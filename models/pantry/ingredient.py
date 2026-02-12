@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING
 
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import Boolean, String, Integer, Enum as SQLEnum
+from sqlalchemy.types import Enum as SQLEnum
 
-from models import Base
+from models.pantry.item import Item
 from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
 from enums import IngredientCategory
 
@@ -11,15 +12,17 @@ if TYPE_CHECKING:
     from models.pantry import Recipe
 
 
-class Ingredient(Base):
+class Ingredient(Item):
     __tablename__ = "pantry--ingredient"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String, unique=True)
-    needed: Mapped[bool] = mapped_column(Boolean, default=False)
+    id: Mapped[int] = mapped_column(ForeignKey("pantry--item.id"), primary_key=True)
     category: Mapped[IngredientCategory] = mapped_column(
         SQLEnum(IngredientCategory), nullable=False, default=IngredientCategory.OTHER
     )
+
+    __mapper_args__ = {
+        "polymorphic_identity": "ingredient",
+    }
 
     recipes: Mapped[list["Recipe"]] = relationship(
         secondary=recipe_ingredient_assoc, back_populates="ingredients"
@@ -28,6 +31,3 @@ class Ingredient(Base):
     @property
     def recipe_ids(self) -> list[int]:
         return [recipe.id for recipe in self.recipes]
-
-    def __repr__(self) -> str:
-        return f"{self.name} (id: {self.id})"

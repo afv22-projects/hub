@@ -1,3 +1,8 @@
+from .consumable import (
+    ConsumableSchema,
+    ConsumableCreate,
+    ConsumableUpdate,
+)
 from .ingredient import (
     IngredientSchema,
     IngredientCreate,

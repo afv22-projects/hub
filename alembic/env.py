@@ -7,6 +7,9 @@ from sqlalchemy import pool
 from alembic import context
 from models.base import Base
 
+# Import all models so alembic can detect them
+from models.pantry import Consumable, Ingredient, Item, Recipe  # noqa: F401
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
