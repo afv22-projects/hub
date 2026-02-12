@@ -15,8 +15,22 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
     # Import all models so they're registered with Base.metadata
-    from models.second_thought import Justification
-    from models.pantry import Consumable, Ingredient, Item, Recipe
+    from models.second_thought import (
+        Justification,
+    )
+    from models.pantry import (
+        Consumable,
+        Ingredient,
+        Item,
+        Recipe,
+    )
+    from models.reflect import (
+        Goal,
+        WeeklyCheckIn,
+        GoalMonthOutcome,
+        MonthlyReview,
+        ScratchpadNote,
+    )
 
     Base.metadata.create_all(engine)
 
