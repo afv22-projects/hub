@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from db import init_db
-from routes import pantry_router, second_thought_router
+from routes import pantry_router, reflect_router, second_thought_router
 
 init_db()
 
@@ -33,6 +33,7 @@ def health_check():
 
 
 app.include_router(pantry_router)
+app.include_router(reflect_router)
 app.include_router(second_thought_router)
 
 
