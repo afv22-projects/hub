@@ -146,6 +146,7 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
         name=recipe.name,
         notes=recipe.notes,
         sources=recipe.sources,
+        tags=recipe.tags,
     )
     db.add(db_recipe)
 
