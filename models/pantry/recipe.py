@@ -17,6 +17,7 @@ class Recipe(Base):
     name: Mapped[str] = mapped_column(String)
     notes: Mapped[str] = mapped_column(String)
     sources: Mapped[list[str]] = mapped_column(JSON, default=[])
+    tags: Mapped[list[str]] = mapped_column(JSON, default=[])
 
     ingredients: Mapped[list["Ingredient"]] = relationship(
         secondary=recipe_ingredient_assoc, back_populates="recipes"

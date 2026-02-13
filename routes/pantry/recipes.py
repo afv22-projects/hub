@@ -78,6 +78,30 @@ def remove_source_from_recipe(id: int, source: str, db: Session = Depends(get_db
     return db_recipe
 
 
+@router.post("/{id}/tags", response_model=RecipeSchema)
+def add_tag_to_recipe(id: int, tag: str, db: Session = Depends(get_db)):
+    db_recipe = db.get(RecipeModel, id)
+    if not db_recipe:
+        raise HTTPException(404, f"Recipe not found (id: {id})")
+
+    db_recipe.tags = db_recipe.tags + [tag]
+    db.commit()
+    return db_recipe
+
+
+@router.delete("/{id}/tags", response_model=RecipeSchema)
+def remove_tag_from_recipe(id: int, tag: str, db: Session = Depends(get_db)):
+    db_recipe = db.get(RecipeModel, id)
+    if not db_recipe:
+        raise HTTPException(404, f"Recipe not found (id: {id})")
+
+    if tag in db_recipe.tags:
+        db_recipe.tags = [db_tag for db_tag in db_recipe.tags if db_tag != tag]
+
+    db.commit()
+    return db_recipe
+
+
 @router.get("/{id}", response_model=RecipeSchema)
 def get_recipe(id: int, db: Session = Depends(get_db)):
     db_recipe = db.get(RecipeModel, id)
