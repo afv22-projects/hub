@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 
 from db import get_db
@@ -10,7 +10,8 @@ from schemas.second_thought import (
     Justification as JustificationSchema,
 )
 
-router = APIRouter(prefix="/second-thought")
+app = FastAPI(title="Second Thought API")
+router = app
 
 
 @router.get("/logs/", response_model=list[JustificationSchema])

@@ -1,3 +1,3 @@
-from .pantry import router as pantry_router
-from .reflect import router as reflect_router
-from .second_thought import router as second_thought_router
+from .pantry import app as pantry_app
+from .reflect import app as reflect_app
+from .second_thought import app as second_thought_app
