@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from models.pantry import DBIngredient
 
 
-class Recipe(Base):
+class DBRecipe(Base):
     __tablename__ = "pantry--recipe"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

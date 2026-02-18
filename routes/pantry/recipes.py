@@ -3,15 +3,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db import get_db
-from models.pantry import DBIngredient, Recipe as RecipeModel
-from schemas.pantry import RecipeCreate, RecipeSchema, RecipeUpdate
+from models.pantry import DBIngredient, DBRecipe
+from schemas.pantry import Recipe, RecipeCreate, RecipeUpdate
 
 router = APIRouter(prefix="/recipes")
 
 
-@router.post("/{id}/ingredients", response_model=RecipeSchema)
+@router.post("/{id}/ingredients", response_model=Recipe)
 def add_ingredient_to_recipe(id: int, name: str, db: Session = Depends(get_db)):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
@@ -35,11 +35,11 @@ def add_ingredient_to_recipe(id: int, name: str, db: Session = Depends(get_db)):
         )
 
 
-@router.delete("/{id}/ingredients", response_model=RecipeSchema)
+@router.delete("/{id}/ingredients", response_model=Recipe)
 def remove_ingredient_from_recipe(
     id: int, ingredient: str, db: Session = Depends(get_db)
 ):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
@@ -54,9 +54,9 @@ def remove_ingredient_from_recipe(
     return db_recipe
 
 
-@router.post("/{id}/sources", response_model=RecipeSchema)
+@router.post("/{id}/sources", response_model=Recipe)
 def add_source_to_recipe(id: int, source: str, db: Session = Depends(get_db)):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
@@ -65,9 +65,9 @@ def add_source_to_recipe(id: int, source: str, db: Session = Depends(get_db)):
     return db_recipe
 
 
-@router.delete("/{id}/sources", response_model=RecipeSchema)
+@router.delete("/{id}/sources", response_model=Recipe)
 def remove_source_from_recipe(id: int, source: str, db: Session = Depends(get_db)):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
@@ -78,9 +78,9 @@ def remove_source_from_recipe(id: int, source: str, db: Session = Depends(get_db
     return db_recipe
 
 
-@router.post("/{id}/tags", response_model=RecipeSchema)
+@router.post("/{id}/tags", response_model=Recipe)
 def add_tag_to_recipe(id: int, tag: str, db: Session = Depends(get_db)):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
@@ -89,9 +89,9 @@ def add_tag_to_recipe(id: int, tag: str, db: Session = Depends(get_db)):
     return db_recipe
 
 
-@router.delete("/{id}/tags", response_model=RecipeSchema)
+@router.delete("/{id}/tags", response_model=Recipe)
 def remove_tag_from_recipe(id: int, tag: str, db: Session = Depends(get_db)):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
@@ -102,17 +102,17 @@ def remove_tag_from_recipe(id: int, tag: str, db: Session = Depends(get_db)):
     return db_recipe
 
 
-@router.get("/{id}", response_model=RecipeSchema)
+@router.get("/{id}", response_model=Recipe)
 def get_recipe(id: int, db: Session = Depends(get_db)):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
     return db_recipe
 
 
-@router.patch("/{id}", response_model=RecipeSchema)
+@router.patch("/{id}", response_model=Recipe)
 def update_recipe(id: int, recipe: RecipeUpdate, db: Session = Depends(get_db)):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
@@ -127,7 +127,7 @@ def update_recipe(id: int, recipe: RecipeUpdate, db: Session = Depends(get_db)):
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_recipe(id: int, db: Session = Depends(get_db)):
-    db_recipe = db.get(RecipeModel, id)
+    db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
@@ -135,14 +135,14 @@ def delete_recipe(id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-@router.get("", response_model=list[RecipeSchema])
+@router.get("", response_model=list[Recipe])
 def get_recipes(db: Session = Depends(get_db)):
-    return db.query(RecipeModel).all()
+    return db.query(DBRecipe).all()
 
 
-@router.post("", response_model=RecipeSchema)
+@router.post("", response_model=Recipe)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
-    db_recipe = RecipeModel(
+    db_recipe = DBRecipe(
         name=recipe.name,
         notes=recipe.notes,
         sources=recipe.sources,
@@ -151,9 +151,7 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     db.add(db_recipe)
 
     for ingredient in recipe.ingredients:
-        db_ingredient = (
-            db.query(DBIngredient).filter_by(name=ingredient).one_or_none()
-        )
+        db_ingredient = db.query(DBIngredient).filter_by(name=ingredient).one_or_none()
         if not db_ingredient:
             db_ingredient = DBIngredient(name=ingredient)
             db.add(db_ingredient)

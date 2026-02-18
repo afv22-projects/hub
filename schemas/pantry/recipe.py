@@ -14,7 +14,7 @@ class RecipeUpdate(BaseModel):
     tags: list[str] | None = None
 
 
-class RecipeSchema(RecipeBase):
+class Recipe(RecipeBase):
     id: int
     ingredients: list[IngredientSummary] = []
 

@@ -9,7 +9,7 @@ from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
 from enums import IngredientCategory
 
 if TYPE_CHECKING:
-    from models.pantry import Recipe
+    from models.pantry import DBRecipe
 
 
 class DBIngredient(DBItem):
@@ -24,7 +24,7 @@ class DBIngredient(DBItem):
         "polymorphic_identity": "ingredient",
     }
 
-    recipes: Mapped[list["Recipe"]] = relationship(
+    recipes: Mapped[list["DBRecipe"]] = relationship(
         secondary=recipe_ingredient_assoc, back_populates="ingredients"
     )
 

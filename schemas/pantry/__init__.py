@@ -13,7 +13,7 @@ from .ingredient import (
     IngredientUpdate,
 )
 from .recipe import (
-    RecipeSchema,
+    Recipe,
     RecipeCreate,
     RecipeUpdate,
 )
