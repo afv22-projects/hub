@@ -87,7 +87,7 @@ def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db
 
 @router.put("", response_model=IngredientSchema)
 def upsert_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db)):
-    print(ingredient.model_dump_json())
+    ingredient.name = ingredient.name.lower()
     db_ingredient = (
         db.query(Ingredient).filter(Ingredient.name == ingredient.name).first()
     )

@@ -87,7 +87,7 @@ def create_consumable(consumable: ConsumableCreate, db: Session = Depends(get_db
 
 @router.put("", response_model=ConsumableSchema)
 def upsert_ingredient(consumable: ConsumableCreate, db: Session = Depends(get_db)):
-    print(consumable.model_dump_json())
+    consumable.name = consumable.name.lower()
     db_consumable = (
         db.query(Consumable).filter(Consumable.name == consumable.name).first()
     )
