@@ -19,9 +19,9 @@ def init_db():
         Justification,
     )
     from models.pantry import (
-        Consumable,
-        Ingredient,
-        Item,
+        DBConsumable,
+        DBIngredient,
+        DBItem,
         Recipe,
     )
     from models.reflect import (

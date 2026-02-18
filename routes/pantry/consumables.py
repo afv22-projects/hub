@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 
 from db import get_db
 from enums import ConsumableCategory
-from models.pantry import Consumable
-from schemas.pantry import ConsumableCreate, ConsumableSchema, ConsumableUpdate
+from models.pantry import DBConsumable
+from schemas.pantry import Consumable, ConsumableCreate, ConsumableUpdate
 
 router = APIRouter(prefix="/consumables")
 
@@ -15,19 +15,19 @@ def get_categories():
     return [category.value for category in ConsumableCategory]
 
 
-@router.get("/{id}", response_model=ConsumableSchema)
+@router.get("/{id}", response_model=Consumable)
 def get_consumable(id: int, db: Session = Depends(get_db)):
-    db_consumable = db.get(Consumable, id)
+    db_consumable = db.get(DBConsumable, id)
     if not db_consumable:
         raise HTTPException(404, f"Consumable not found (id: {id})")
     return db_consumable
 
 
-@router.patch("/{id}", response_model=ConsumableSchema)
+@router.patch("/{id}", response_model=Consumable)
 def update_consumable(
     id: int, consumable: ConsumableUpdate, db: Session = Depends(get_db)
 ):
-    db_consumable = db.get(Consumable, id)
+    db_consumable = db.get(DBConsumable, id)
     if not db_consumable:
         raise HTTPException(404, f"Consumable not found (id: {id})")
 
@@ -51,7 +51,7 @@ def update_consumable(
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_consumable(id: int, db: Session = Depends(get_db)):
-    db_consumable = db.get(Consumable, id)
+    db_consumable = db.get(DBConsumable, id)
     if not db_consumable:
         raise HTTPException(404, f"Consumable not found (id: {id})")
 
@@ -59,14 +59,14 @@ def delete_consumable(id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-@router.get("", response_model=list[ConsumableSchema])
+@router.get("", response_model=list[Consumable])
 def get_consumables(db: Session = Depends(get_db)):
-    return db.query(Consumable).all()
+    return db.query(DBConsumable).all()
 
 
-@router.post("", response_model=ConsumableSchema)
+@router.post("", response_model=Consumable)
 def create_consumable(consumable: ConsumableCreate, db: Session = Depends(get_db)):
-    db_consumable = Consumable(
+    db_consumable = DBConsumable(
         name=consumable.name,
         needed=consumable.needed,
         category=consumable.category,
@@ -85,11 +85,11 @@ def create_consumable(consumable: ConsumableCreate, db: Session = Depends(get_db
         )
 
 
-@router.put("", response_model=ConsumableSchema)
+@router.put("", response_model=Consumable)
 def upsert_ingredient(consumable: ConsumableCreate, db: Session = Depends(get_db)):
     consumable.name = consumable.name.lower()
     db_consumable = (
-        db.query(Consumable).filter(Consumable.name == consumable.name).first()
+        db.query(DBConsumable).filter(DBConsumable.name == consumable.name).first()
     )
 
     if db_consumable:
@@ -97,7 +97,7 @@ def upsert_ingredient(consumable: ConsumableCreate, db: Session = Depends(get_db
         if consumable.category != ConsumableCategory.OTHER:
             db_consumable.category = consumable.category
     else:
-        db_consumable = Consumable(
+        db_consumable = DBConsumable(
             name=consumable.name,
             needed=consumable.needed,
             category=consumable.category,

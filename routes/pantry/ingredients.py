@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 
 from db import get_db
 from enums import IngredientCategory
-from models.pantry import Ingredient
-from schemas.pantry import IngredientCreate, IngredientSchema, IngredientUpdate
+from models.pantry import DBIngredient
+from schemas.pantry import Ingredient, IngredientCreate, IngredientUpdate
 
 router = APIRouter(prefix="/ingredients")
 
@@ -15,19 +15,19 @@ def get_categories():
     return [category.value for category in IngredientCategory]
 
 
-@router.get("/{id}", response_model=IngredientSchema)
+@router.get("/{id}", response_model=Ingredient)
 def get_ingredient(id: int, db: Session = Depends(get_db)):
-    db_ingredient = db.get(Ingredient, id)
+    db_ingredient = db.get(DBIngredient, id)
     if not db_ingredient:
         raise HTTPException(404, f"Ingredient not found (id: {id})")
     return db_ingredient
 
 
-@router.patch("/{id}", response_model=IngredientSchema)
+@router.patch("/{id}", response_model=Ingredient)
 def update_ingredient(
     id: int, ingredient: IngredientUpdate, db: Session = Depends(get_db)
 ):
-    db_ingredient = db.get(Ingredient, id)
+    db_ingredient = db.get(DBIngredient, id)
     if not db_ingredient:
         raise HTTPException(404, f"Ingredient not found (id: {id})")
 
@@ -51,7 +51,7 @@ def update_ingredient(
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_ingredient(id: int, db: Session = Depends(get_db)):
-    db_ingredient = db.get(Ingredient, id)
+    db_ingredient = db.get(DBIngredient, id)
     if not db_ingredient:
         raise HTTPException(404, f"Ingredient not found (id: {id})")
 
@@ -59,14 +59,14 @@ def delete_ingredient(id: int, db: Session = Depends(get_db)):
     db.commit()
 
 
-@router.get("", response_model=list[IngredientSchema])
+@router.get("", response_model=list[Ingredient])
 def get_ingredients(db: Session = Depends(get_db)):
-    return db.query(Ingredient).all()
+    return db.query(DBIngredient).all()
 
 
-@router.post("", response_model=IngredientSchema)
+@router.post("", response_model=Ingredient)
 def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db)):
-    db_ingredient = Ingredient(
+    db_ingredient = DBIngredient(
         name=ingredient.name,
         needed=ingredient.needed,
         category=ingredient.category,
@@ -85,11 +85,11 @@ def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db
         )
 
 
-@router.put("", response_model=IngredientSchema)
+@router.put("", response_model=Ingredient)
 def upsert_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db)):
     ingredient.name = ingredient.name.lower()
     db_ingredient = (
-        db.query(Ingredient).filter(Ingredient.name == ingredient.name).first()
+        db.query(DBIngredient).filter(DBIngredient.name == ingredient.name).first()
     )
 
     if db_ingredient:
@@ -97,7 +97,7 @@ def upsert_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db
         if ingredient.category != IngredientCategory.OTHER:
             db_ingredient.category = ingredient.category
     else:
-        db_ingredient = Ingredient(
+        db_ingredient = DBIngredient(
             name=ingredient.name,
             needed=ingredient.needed,
             category=ingredient.category,

@@ -4,7 +4,7 @@ from sqlalchemy.types import Boolean, String, Integer
 from models import Base
 
 
-class Item(Base):
+class DBItem(Base):
     """Base class for all pantry items (ingredients, consumables, etc.)."""
 
     __tablename__ = "pantry--item"

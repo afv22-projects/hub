@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db import get_db
-from models.pantry import Ingredient as IngredientModel, Recipe as RecipeModel
+from models.pantry import DBIngredient, Recipe as RecipeModel
 from schemas.pantry import RecipeCreate, RecipeSchema, RecipeUpdate
 
 router = APIRouter(prefix="/recipes")
@@ -15,9 +15,9 @@ def add_ingredient_to_recipe(id: int, name: str, db: Session = Depends(get_db)):
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
-    db_ingredient = db.query(IngredientModel).filter_by(name=name).one_or_none()
+    db_ingredient = db.query(DBIngredient).filter_by(name=name).one_or_none()
     if not db_ingredient:
-        db_ingredient = IngredientModel(name=name)
+        db_ingredient = DBIngredient(name=name)
         db.add(db_ingredient)
 
     if db_ingredient not in db_recipe.ingredients:
@@ -43,7 +43,7 @@ def remove_ingredient_from_recipe(
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
 
-    db_ingredient = db.query(IngredientModel).filter_by(name=ingredient).one_or_none()
+    db_ingredient = db.query(DBIngredient).filter_by(name=ingredient).one_or_none()
     if not db_ingredient:
         raise HTTPException(404, f"Ingredient '{ingredient}' not found")
 
@@ -152,10 +152,10 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
 
     for ingredient in recipe.ingredients:
         db_ingredient = (
-            db.query(IngredientModel).filter_by(name=ingredient).one_or_none()
+            db.query(DBIngredient).filter_by(name=ingredient).one_or_none()
         )
         if not db_ingredient:
-            db_ingredient = IngredientModel(name=ingredient)
+            db_ingredient = DBIngredient(name=ingredient)
             db.add(db_ingredient)
         db_recipe.ingredients.append(db_ingredient)
 

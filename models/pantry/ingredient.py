@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
-from models.pantry.item import Item
+from models.pantry.item import DBItem
 from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
 from enums import IngredientCategory
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from models.pantry import Recipe
 
 
-class Ingredient(Item):
+class DBIngredient(DBItem):
     __tablename__ = "pantry--ingredient"
 
     id: Mapped[int] = mapped_column(ForeignKey("pantry--item.id"), primary_key=True)

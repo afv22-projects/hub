@@ -1,4 +1,4 @@
-from .consumable import Consumable
-from .ingredient import Ingredient
-from .item import Item
+from .consumable import DBConsumable
+from .ingredient import DBIngredient
+from .item import DBItem
 from .recipe import Recipe

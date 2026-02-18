@@ -7,7 +7,7 @@ from models import Base
 from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
 
 if TYPE_CHECKING:
-    from models.pantry import Ingredient
+    from models.pantry import DBIngredient
 
 
 class Recipe(Base):
@@ -19,7 +19,7 @@ class Recipe(Base):
     sources: Mapped[list[str]] = mapped_column(JSON, default=[])
     tags: Mapped[list[str]] = mapped_column(JSON, default=[])
 
-    ingredients: Mapped[list["Ingredient"]] = relationship(
+    ingredients: Mapped[list["DBIngredient"]] = relationship(
         secondary=recipe_ingredient_assoc, back_populates="recipes"
     )
 

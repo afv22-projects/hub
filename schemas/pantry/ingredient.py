@@ -13,7 +13,7 @@ class IngredientUpdate(BaseModel):
     category: IngredientCategory | None = None
 
 
-class IngredientSchema(IngredientBase):
+class Ingredient(IngredientBase):
     id: int
     recipes: list[RecipeSummary] = []
 

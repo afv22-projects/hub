@@ -2,11 +2,11 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Enum as SQLEnum
 
-from models.pantry.item import Item
+from models.pantry.item import DBItem
 from enums import ConsumableCategory
 
 
-class Consumable(Item):
+class DBConsumable(DBItem):
     __tablename__ = "pantry--consumable"
 
     id: Mapped[int] = mapped_column(ForeignKey("pantry--item.id"), primary_key=True)

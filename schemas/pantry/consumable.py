@@ -18,7 +18,7 @@ class ConsumableUpdate(BaseModel):
     category: ConsumableCategory | None = None
 
 
-class ConsumableSchema(ConsumableBase):
+class Consumable(ConsumableBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
