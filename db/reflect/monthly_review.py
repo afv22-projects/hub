@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import String, Integer
 
-from models import Base
+from db import Base
 
 
 class MonthlyReview(Base):

@@ -3,7 +3,10 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models.base import Base
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase): ...
 
 
 DB_URI = os.environ.get("DB_URI", "sqlite:///./app.db")
@@ -15,16 +18,16 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
     # Import all models so they're registered with Base.metadata
-    from models.second_thought import (
+    from db.second_thought import (
         Justification,
     )
-    from models.pantry import (
+    from db.pantry import (
         DBConsumable,
         DBIngredient,
         DBItem,
         DBRecipe,
     )
-    from models.reflect import (
+    from db.reflect import (
         Goal,
         WeeklyCheckIn,
         GoalMonthOutcome,

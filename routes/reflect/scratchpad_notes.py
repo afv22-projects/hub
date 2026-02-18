@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 
 from db import get_db
-from models.reflect import ScratchpadNote as ScratchpadNoteModel
+from db.reflect import ScratchpadNote as ScratchpadNoteModel
 from schemas.reflect import (
     ScratchpadNoteCreate,
     ScratchpadNotePromote,

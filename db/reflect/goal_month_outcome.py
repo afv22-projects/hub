@@ -4,11 +4,11 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Enum as SQLEnum
 
-from models import Base
+from db import Base
 from enums import GoalOutcome
 
 if TYPE_CHECKING:
-    from models.reflect import Goal
+    from db.reflect import Goal
 
 
 class GoalMonthOutcome(Base):

@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Enum as SQLEnum
 
-from models.pantry.item import DBItem
+from .item import DBItem
 from enums import ConsumableCategory
 
 

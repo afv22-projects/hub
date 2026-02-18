@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 
 from db import get_db
-from models.reflect import WeeklyCheckIn as WeeklyCheckInModel
+from db.reflect import WeeklyCheckIn as WeeklyCheckInModel
 from schemas.reflect import (
     WeeklyCheckInCreate,
     WeeklyCheckInSchema,

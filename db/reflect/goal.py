@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
 
-from models import Base
+from db import Base
 from enums import GoalPriority, GoalStatus
 
 if TYPE_CHECKING:
-    from models.reflect import WeeklyCheckIn, GoalMonthOutcome, ScratchpadNote
+    from db.reflect import WeeklyCheckIn, GoalMonthOutcome, ScratchpadNote
 
 
 class Goal(Base):

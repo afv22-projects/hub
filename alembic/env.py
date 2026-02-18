@@ -5,16 +5,16 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from models.base import Base
+from db import Base
 
 # Import all models so alembic can detect them
-from models.pantry import (  # noqa: F401
+from db.pantry import (  # noqa: F401
     DBConsumable,
     DBIngredient,
     DBItem,
     DBRecipe,
 )
-from models.reflect import (  # noqa: F401
+from db.reflect import (  # noqa: F401
     Goal,
     GoalMonthOutcome,
     MonthlyReview,

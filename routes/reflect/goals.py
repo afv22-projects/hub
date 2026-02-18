@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 
 from db import get_db
+from db.reflect import Goal as GoalModel, WeeklyCheckIn as WeeklyCheckInModel
 from enums import GoalStatus
-from models.reflect import Goal as GoalModel, WeeklyCheckIn as WeeklyCheckInModel
 from schemas.reflect import GoalCreate, GoalSchema, GoalUpdate
 
 router = APIRouter(prefix="/goals")

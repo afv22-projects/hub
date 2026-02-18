@@ -4,10 +4,10 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer
 
-from models import Base
+from db import Base
 
 if TYPE_CHECKING:
-    from models.reflect import Goal
+    from db.reflect import Goal
 
 
 class ScratchpadNote(Base):

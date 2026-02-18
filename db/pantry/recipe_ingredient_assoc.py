@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
 
-from models import Base
+from db import Base
 
 recipe_ingredient_assoc = Table(
     "pantry--recipe_ingredient_assoc",

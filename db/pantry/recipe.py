@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, JSON
 
-from models import Base
-from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
+from db import Base
+from .recipe_ingredient_assoc import recipe_ingredient_assoc
 
 if TYPE_CHECKING:
-    from models.pantry import DBIngredient
+    from .ingredient import DBIngredient
 
 
 class DBRecipe(Base):

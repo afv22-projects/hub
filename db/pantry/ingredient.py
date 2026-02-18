@@ -4,12 +4,12 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
-from models.pantry.item import DBItem
-from models.pantry.recipe_ingredient_assoc import recipe_ingredient_assoc
+from .item import DBItem
+from .recipe_ingredient_assoc import recipe_ingredient_assoc
 from enums import IngredientCategory
 
 if TYPE_CHECKING:
-    from models.pantry import DBRecipe
+    from db.pantry import DBRecipe
 
 
 class DBIngredient(DBItem):

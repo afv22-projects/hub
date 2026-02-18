@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 
 from db import get_db
-from models.second_thought import Justification as JustificationModel
+from db.second_thought import Justification as JustificationModel
 from schemas.second_thought import (
     JustificationCreate,
     Justification as JustificationSchema,

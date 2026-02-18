@@ -3,8 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db import get_db
+from db.pantry import DBIngredient
 from enums import IngredientCategory
-from models.pantry import DBIngredient
 from schemas.pantry import Ingredient, IngredientCreate, IngredientUpdate
 
 router = APIRouter(prefix="/ingredients")

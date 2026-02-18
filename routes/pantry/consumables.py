@@ -3,8 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db import get_db
+from db.pantry import DBConsumable
 from enums import ConsumableCategory
-from models.pantry import DBConsumable
 from schemas.pantry import Consumable, ConsumableCreate, ConsumableUpdate
 
 router = APIRouter(prefix="/consumables")

@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db import get_db
-from models.pantry import DBIngredient, DBRecipe
+from db.pantry import DBIngredient, DBRecipe
 from schemas.pantry import Recipe, RecipeCreate, RecipeUpdate
 
 router = APIRouter(prefix="/recipes")
