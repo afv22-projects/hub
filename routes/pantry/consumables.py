@@ -83,3 +83,27 @@ def create_consumable(consumable: ConsumableCreate, db: Session = Depends(get_db
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Consumable with name '{consumable.name}' already exists",
         )
+
+
+@router.put("", response_model=ConsumableSchema)
+def upsert_ingredient(consumable: ConsumableCreate, db: Session = Depends(get_db)):
+    print(consumable.model_dump_json())
+    db_consumable = (
+        db.query(Consumable).filter(Consumable.name == consumable.name).first()
+    )
+
+    if db_consumable:
+        db_consumable.needed = consumable.needed
+        if consumable.category != ConsumableCategory.OTHER:
+            db_consumable.category = consumable.category
+    else:
+        db_consumable = Consumable(
+            name=consumable.name,
+            needed=consumable.needed,
+            category=consumable.category,
+        )
+        db.add(db_consumable)
+
+    db.commit()
+    db.refresh(db_consumable)
+    return db_consumable
