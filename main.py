@@ -9,7 +9,7 @@ from routes import pantry_app, reflect_app, second_thought_app
 init_db()
 
 
-CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")
+CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
 
 app = FastAPI(title="Hub")
 
