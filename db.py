@@ -22,7 +22,7 @@ def init_db():
         DBConsumable,
         DBIngredient,
         DBItem,
-        Recipe,
+        DBRecipe,
     )
     from models.reflect import (
         Goal,

@@ -12,7 +12,7 @@ from models.pantry import (  # noqa: F401
     DBConsumable,
     DBIngredient,
     DBItem,
-    Recipe,
+    DBRecipe,
 )
 from models.reflect import (  # noqa: F401
     Goal,
