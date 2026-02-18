@@ -1,3 +1,4 @@
+from .base import IngredientSummary, RecipeSummary
 from .consumable import (
     ConsumableSchema,
     ConsumableCreate,

@@ -1,11 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-
-class RecipeBase(BaseModel):
-    name: str
-    notes: str
-    sources: list[str]
-    tags: list[str]
+from .base import RecipeBase, IngredientSummary
 
 
 class RecipeCreate(RecipeBase):
@@ -21,6 +16,6 @@ class RecipeUpdate(BaseModel):
 
 class RecipeSchema(RecipeBase):
     id: int
-    ingredient_ids: list[int] = []
+    ingredients: list[IngredientSummary] = []
 
     model_config = ConfigDict(from_attributes=True)

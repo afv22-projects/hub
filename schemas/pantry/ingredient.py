@@ -1,12 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
 from enums import IngredientCategory
-
-
-class IngredientBase(BaseModel):
-    name: str
-    needed: bool
-    category: IngredientCategory
+from .base import IngredientBase, RecipeSummary
 
 
 class IngredientCreate(IngredientBase): ...
@@ -20,6 +15,6 @@ class IngredientUpdate(BaseModel):
 
 class IngredientSchema(IngredientBase):
     id: int
-    recipe_ids: list[int]
+    recipes: list[RecipeSummary] = []
 
     model_config = ConfigDict(from_attributes=True)
