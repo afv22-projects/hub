@@ -10,11 +10,6 @@ from schemas.pantry import Consumable, ConsumableCreate, ConsumableUpdate
 router = APIRouter(prefix="/consumables")
 
 
-@router.get("/categories", response_model=list[str])
-def get_categories():
-    return [category.value for category in ConsumableCategory]
-
-
 @router.get("/{id}", response_model=Consumable)
 def get_consumable(id: int, db: Session = Depends(get_db)):
     db_consumable = db.get(DBConsumable, id)

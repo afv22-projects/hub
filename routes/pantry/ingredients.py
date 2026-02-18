@@ -10,11 +10,6 @@ from schemas.pantry import Ingredient, IngredientCreate, IngredientUpdate
 router = APIRouter(prefix="/ingredients")
 
 
-@router.get("/categories", response_model=list[str])
-def get_categories():
-    return [category.value for category in IngredientCategory]
-
-
 @router.get("/{id}", response_model=Ingredient)
 def get_ingredient(id: int, db: Session = Depends(get_db)):
     db_ingredient = db.get(DBIngredient, id)
