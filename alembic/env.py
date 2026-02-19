@@ -1,11 +1,12 @@
+import logging
 import os
-from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
 from db import Base
+from logging_config import init_logging, InterceptHandler
 
 # Import all models so alembic can detect them
 from db.pantry import (  # noqa: F401
@@ -30,10 +31,12 @@ config = context.config
 db_uri = os.environ.get("DB_URI", "sqlite:///./app.db")
 config.set_main_option("sqlalchemy.url", db_uri)
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+# Initialize loguru logging and route alembic/sqlalchemy through it
+init_logging(os.environ.get("LOG_LEVEL", "INFO"))
+logging.getLogger("alembic").handlers = [InterceptHandler()]
+logging.getLogger("alembic").setLevel(logging.INFO)
+logging.getLogger("sqlalchemy.engine").handlers = [InterceptHandler()]
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
