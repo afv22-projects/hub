@@ -12,24 +12,6 @@ class Base(DeclarativeBase): ...
 
 
 def init_db():
-    # Import all models so they're registered with Base.metadata
-    from db.second_thought import (
-        Justification,
-    )
-    from db.pantry import (
-        DBConsumable,
-        DBIngredient,
-        DBItem,
-        DBRecipe,
-    )
-    from db.reflect import (
-        Goal,
-        WeeklyCheckIn,
-        GoalMonthOutcome,
-        MonthlyReview,
-        ScratchpadNote,
-    )
-
     Base.metadata.create_all(engine)
 
 
