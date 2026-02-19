@@ -13,7 +13,7 @@ request_id_ctx: ContextVar[str | None] = ContextVar("request_id", default=None)
 
 
 FILTERED_MESSAGES = {
-    "Invalid HTTP request received.",
+    "Invalid HTTP request received.",  # Occurs when browsers use overly aggressive optimization techniques
 }
 
 
