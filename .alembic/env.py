@@ -23,6 +23,11 @@ from db.reflect import (  # noqa: F401
     WeeklyCheckIn,
 )
 
+# Configure mappers to register version tables with metadata
+from sqlalchemy.orm import configure_mappers
+
+configure_mappers()
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
