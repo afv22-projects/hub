@@ -29,3 +29,9 @@ class Goal(GoalBase):
     month_created: str  # "YYYY-MM"
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class GoalHistoryEntry(BaseModel):
+    timestamp: str  # ISO 8601
+    operation: str  # "create", "update", "delete"
+    changes: dict[str, str | None]  # field name -> new value

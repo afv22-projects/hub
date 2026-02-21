@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
@@ -34,6 +34,9 @@ class DBGoal(Base):
     month_outcomes: Mapped[list["DBGoalMonthOutcome"]] = relationship(
         back_populates="goal", cascade="all, delete-orphan"
     )
+
+    # Added by sqlalchemy-history
+    versions: ClassVar[list[Any]]
 
     def __repr__(self) -> str:
         return f"Goal(id={self.id}, title={self.title}, priority={self.priority}, status={self.status})"
