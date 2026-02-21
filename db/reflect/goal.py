@@ -14,6 +14,7 @@ class DBGoal(Base):
     """Represents a goal with priority, status, and tracking."""
 
     __tablename__ = "reflect--goal"
+    __versioned__ = {}
 
     id: Mapped[str] = mapped_column(String, primary_key=True)  # UUID
     title: Mapped[str] = mapped_column(String, nullable=False)
