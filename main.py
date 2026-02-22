@@ -1,22 +1,23 @@
 import os
 import time
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
 
+load_dotenv()
+
 from db import init_db
 from logging_config import init_logging, get_uvicorn_log_config, set_request_id
 from routes import pantry_app, reflect_app, second_thought_app
-
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
 
 init_logging(LOG_LEVEL)
 init_db()
-
 
 app = FastAPI(title="Hub")
 
