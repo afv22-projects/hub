@@ -8,10 +8,10 @@ from db import Base
 from enums import GoalOutcome
 
 if TYPE_CHECKING:
-    from db.reflect import Goal
+    from db.reflect import DBGoal
 
 
-class GoalMonthOutcome(Base):
+class DBGoalMonthOutcome(Base):
     """Represents the outcome of a goal for a specific month."""
 
     __tablename__ = "reflect--goal_month_outcome"
@@ -25,7 +25,7 @@ class GoalMonthOutcome(Base):
     reflection_note: Mapped[str] = mapped_column(String, nullable=False)
 
     # Relationships
-    goal: Mapped["Goal"] = relationship(back_populates="month_outcomes")
+    goal: Mapped["DBGoal"] = relationship(back_populates="month_outcomes")
 
     def __repr__(self) -> str:
         return f"GoalMonthOutcome(id={self.id}, goal_id={self.goal_id}, month={self.month}, outcome={self.outcome})"

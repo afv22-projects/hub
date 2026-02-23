@@ -12,7 +12,7 @@ class ScratchpadNotePromote(BaseModel):
     goal_id: str
 
 
-class ScratchpadNoteSchema(ScratchpadNoteBase):
+class ScratchpadNote(ScratchpadNoteBase):
     id: str
     created_at: int
     promoted_to_goal_id: str | None

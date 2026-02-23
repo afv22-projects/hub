@@ -22,7 +22,7 @@ class GoalUpdate(BaseModel):
     status: GoalStatus | None = None
 
 
-class GoalSchema(GoalBase):
+class Goal(GoalBase):
     id: str
     status: GoalStatus
     created_at: int

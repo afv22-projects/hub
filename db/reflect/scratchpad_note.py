@@ -7,10 +7,10 @@ from sqlalchemy.types import String, Integer
 from db import Base
 
 if TYPE_CHECKING:
-    from db.reflect import Goal
+    from db.reflect import DBGoal
 
 
-class ScratchpadNote(Base):
+class DBScratchpadNote(Base):
     """Represents a scratchpad note that can be promoted to a goal."""
 
     __tablename__ = "reflect--scratchpad_note"
@@ -23,7 +23,7 @@ class ScratchpadNote(Base):
     )
 
     # Relationships
-    promoted_goal: Mapped["Goal | None"] = relationship(back_populates="promoted_notes")
+    promoted_goal: Mapped["DBGoal | None"] = relationship(back_populates="promoted_notes")
 
     def __repr__(self) -> str:
         promoted = (

@@ -6,9 +6,9 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 
 from db import get_db
-from db.reflect import Goal as GoalModel, WeeklyCheckIn as WeeklyCheckInModel
+from db.reflect import DBGoal, DBWeeklyCheckIn
 from enums import GoalStatus
-from schemas.reflect import GoalCreate, GoalSchema, GoalUpdate
+from schemas.reflect import Goal, GoalCreate, GoalUpdate
 
 router = APIRouter(prefix="/goals")
 
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/goals")
 @router.post("", response_model=dict)
 def create_goal(goal: GoalCreate, db: Session = Depends(get_db)):
     goal_id = str(uuid.uuid4())
-    db_goal = GoalModel(
+    db_goal = DBGoal(
         id=goal_id,
         title=goal.title,
         priority=goal.priority,
@@ -31,9 +31,9 @@ def create_goal(goal: GoalCreate, db: Session = Depends(get_db)):
     return {"id": goal_id}
 
 
-@router.get("/{goal_id}", response_model=GoalSchema)
+@router.get("/{goal_id}", response_model=Goal)
 def get_goal(goal_id: str, db: Session = Depends(get_db)):
-    db_goal = db.get(GoalModel, goal_id)
+    db_goal = db.get(DBGoal, goal_id)
     if not db_goal:
         raise HTTPException(404, f"Goal not found (id: {goal_id})")
     return db_goal
@@ -41,7 +41,7 @@ def get_goal(goal_id: str, db: Session = Depends(get_db)):
 
 @router.patch("/{goal_id}", response_model=dict)
 def update_goal(goal_id: str, updates: GoalUpdate, db: Session = Depends(get_db)):
-    db_goal = db.get(GoalModel, goal_id)
+    db_goal = db.get(DBGoal, goal_id)
     if not db_goal:
         raise HTTPException(404, f"Goal not found (id: {goal_id})")
 
@@ -62,7 +62,7 @@ def update_goal(goal_id: str, updates: GoalUpdate, db: Session = Depends(get_db)
 
 @router.delete("/{goal_id}", response_model=dict)
 def delete_goal(goal_id: str, db: Session = Depends(get_db)):
-    db_goal = db.get(GoalModel, goal_id)
+    db_goal = db.get(DBGoal, goal_id)
     if not db_goal:
         raise HTTPException(404, f"Goal not found (id: {goal_id})")
 
@@ -71,35 +71,33 @@ def delete_goal(goal_id: str, db: Session = Depends(get_db)):
     return {"success": True}
 
 
-@router.get("", response_model=list[GoalSchema])
+@router.get("", response_model=list[Goal])
 def get_goals(
     status: Literal["active", "inactive"] | None = Query(None),
     sort: Literal["priority"] | None = Query(None),
     db: Session = Depends(get_db),
 ):
-    query = db.query(GoalModel)
+    query = db.query(DBGoal)
 
     if status == "active":
-        query = query.filter(GoalModel.status == GoalStatus.ACTIVE)
+        query = query.filter(DBGoal.status == GoalStatus.ACTIVE)
     elif status == "inactive":
-        query = query.filter(GoalModel.status != GoalStatus.ACTIVE)
+        query = query.filter(DBGoal.status != GoalStatus.ACTIVE)
 
     if sort == "priority":
-        query = query.order_by(GoalModel.priority)
+        query = query.order_by(DBGoal.priority)
 
     return query.all()
 
 
-@router.get("/weekly-checkin/{week_of}", response_model=list[GoalSchema])
+@router.get("/weekly-checkin/{week_of}", response_model=list[Goal])
 def get_goals_for_weekly_checkin(week_of: str, db: Session = Depends(get_db)):
-    active_goals_query = db.query(GoalModel).filter(
-        GoalModel.status == GoalStatus.ACTIVE
-    )
+    active_goals_query = db.query(DBGoal).filter(DBGoal.status == GoalStatus.ACTIVE)
 
     goals_with_checkins_query = (
-        db.query(GoalModel)
-        .join(WeeklyCheckInModel)
-        .filter(WeeklyCheckInModel.week_of == week_of)
+        db.query(DBGoal)
+        .join(DBWeeklyCheckIn)
+        .filter(DBWeeklyCheckIn.week_of == week_of)
     )
 
     active_goal_ids = {goal.id for goal in active_goals_query.all()}
@@ -107,9 +105,9 @@ def get_goals_for_weekly_checkin(week_of: str, db: Session = Depends(get_db)):
     all_goal_ids = active_goal_ids | goals_with_checkin_ids
 
     goals = (
-        db.query(GoalModel)
-        .filter(GoalModel.id.in_(all_goal_ids))
-        .order_by(GoalModel.priority)
+        db.query(DBGoal)
+        .filter(DBGoal.id.in_(all_goal_ids))
+        .order_by(DBGoal.priority)
         .all()
     )
 

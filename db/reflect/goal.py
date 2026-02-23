@@ -7,10 +7,10 @@ from db import Base
 from enums import GoalPriority, GoalStatus
 
 if TYPE_CHECKING:
-    from db.reflect import WeeklyCheckIn, GoalMonthOutcome, ScratchpadNote
+    from db.reflect import DBWeeklyCheckIn, DBGoalMonthOutcome, DBScratchpadNote
 
 
-class Goal(Base):
+class DBGoal(Base):
     """Represents a goal with priority, status, and tracking."""
 
     __tablename__ = "reflect--goal"
@@ -27,13 +27,13 @@ class Goal(Base):
     month_created: Mapped[str] = mapped_column(String, nullable=False)  # "YYYY-MM"
 
     # Relationships
-    weekly_check_ins: Mapped[list["WeeklyCheckIn"]] = relationship(
+    weekly_check_ins: Mapped[list["DBWeeklyCheckIn"]] = relationship(
         back_populates="goal", cascade="all, delete-orphan"
     )
-    month_outcomes: Mapped[list["GoalMonthOutcome"]] = relationship(
+    month_outcomes: Mapped[list["DBGoalMonthOutcome"]] = relationship(
         back_populates="goal", cascade="all, delete-orphan"
     )
-    promoted_notes: Mapped[list["ScratchpadNote"]] = relationship(
+    promoted_notes: Mapped[list["DBScratchpadNote"]] = relationship(
         back_populates="promoted_goal"
     )
 

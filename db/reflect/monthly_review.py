@@ -4,7 +4,7 @@ from sqlalchemy.types import String, Integer
 from db import Base
 
 
-class MonthlyReview(Base):
+class DBMonthlyReview(Base):
     """Represents a monthly review with key takeaways."""
 
     __tablename__ = "reflect--monthly_review"

@@ -8,10 +8,10 @@ from db import Base
 from enums import TrackingStatus
 
 if TYPE_CHECKING:
-    from db.reflect import Goal
+    from db.reflect import DBGoal
 
 
-class WeeklyCheckIn(Base):
+class DBWeeklyCheckIn(Base):
     """Represents a weekly check-in for a goal."""
 
     __tablename__ = "reflect--weekly_check_in"
@@ -31,7 +31,7 @@ class WeeklyCheckIn(Base):
     created_at: Mapped[int] = mapped_column(Integer, nullable=False)  # timestamp
 
     # Relationships
-    goal: Mapped["Goal"] = relationship(back_populates="weekly_check_ins")
+    goal: Mapped["DBGoal"] = relationship(back_populates="weekly_check_ins")
 
     def __repr__(self) -> str:
         return f"WeeklyCheckIn(id={self.id}, goal_id={self.goal_id}, week_of={self.week_of}, status={self.tracking_status})"

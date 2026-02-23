@@ -20,7 +20,7 @@ class WeeklyCheckInUpdate(BaseModel):
     strategy_adjustment: str | None = None
 
 
-class WeeklyCheckInSchema(WeeklyCheckInBase):
+class WeeklyCheckIn(WeeklyCheckInBase):
     id: str
     created_at: int
 
