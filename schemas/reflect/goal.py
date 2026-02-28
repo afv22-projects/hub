@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 from enums import GoalPriority, GoalStatus
@@ -33,5 +35,5 @@ class Goal(GoalBase):
 
 class GoalHistoryEntry(BaseModel):
     timestamp: str  # ISO 8601
-    operation: str  # "create", "update", "delete"
+    operation: Literal["create", "update", "delete"]
     changes: dict[str, str | None]  # field name -> new value
