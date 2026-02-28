@@ -32,3 +32,9 @@ class GoalOutcome(str, Enum):
     COMPLETED = "completed"
     IN_PROGRESS = "in_progress"
     PIVOTED = "pivoted"
+
+
+class GoalHistoryOperation(str, Enum):
+    CREATE = "create"
+    UPDATE = "update"
+    DELETE = "delete"

@@ -1,6 +1,12 @@
 from enums.consumable_category import ConsumableCategory
 from enums.ingredient_category import IngredientCategory
-from enums.reflect import GoalPriority, GoalStatus, TrackingStatus, GoalOutcome
+from enums.reflect import (
+    GoalPriority,
+    GoalStatus,
+    TrackingStatus,
+    GoalOutcome,
+    GoalHistoryOperation,
+)
 
 __all__ = [
     "ConsumableCategory",
@@ -9,4 +15,5 @@ __all__ = [
     "GoalStatus",
     "TrackingStatus",
     "GoalOutcome",
+    "GoalHistoryOperation",
 ]

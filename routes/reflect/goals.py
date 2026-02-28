@@ -1,3 +1,4 @@
+import datetime
 import time
 import uuid
 from typing import Literal
@@ -7,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from db import get_db
 from db.reflect import DBGoal, DBWeeklyCheckIn
-from enums import GoalStatus
+from enums import GoalStatus, GoalHistoryOperation
 from schemas.reflect import (
     Goal,
     GoalCreate,
@@ -96,7 +97,6 @@ def get_goals(
 
 
 TRACKED_FIELDS = ["title", "priority", "exit_criteria", "action_plan", "status"]
-OPERATION_TYPES = {0: "create", 1: "update", 2: "delete"}
 
 
 @router.get("/{goal_id}/history", response_model=list[GoalHistoryEntry])
@@ -107,12 +107,9 @@ def get_goal_history(goal_id: str, db: Session = Depends(get_db)):
 
     history: list[GoalHistoryEntry] = []
     for version in db_goal.versions:
-        operation = OPERATION_TYPES.get(version.operation_type, "unknown")
-        timestamp = (
-            version.transaction.issued_at.isoformat()
-            if version.transaction.issued_at
-            else ""
-        )
+        operation = GoalHistoryOperation[version.operation_type]
+        issued_at: datetime.datetime = version.transaction.issued_at
+        timestamp = (issued_at.isoformat() + "Z") if issued_at else ""
 
         if operation == "create":
             # Include initial state for creation
