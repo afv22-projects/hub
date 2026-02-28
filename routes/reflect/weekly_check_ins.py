@@ -1,6 +1,3 @@
-import time
-import uuid
-
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -17,19 +14,16 @@ router = APIRouter(prefix="/weekly-checkins")
 
 @router.post("", response_model=dict)
 def create_weekly_checkin(checkin: WeeklyCheckInCreate, db: Session = Depends(get_db)):
-    checkin_id = str(uuid.uuid4())
     db_checkin = DBWeeklyCheckIn(
-        id=checkin_id,
         goal_id=checkin.goal_id,
         week_of=checkin.week_of,
         tracking_status=checkin.tracking_status,
         reflection_note=checkin.reflection_note,
         strategy_adjustment=checkin.strategy_adjustment,
-        created_at=int(time.time() * 1000),  # milliseconds
     )
     db.add(db_checkin)
     db.commit()
-    return {"id": checkin_id}
+    return {"id": db_checkin.id}
 
 
 @router.get("", response_model=list[WeeklyCheckIn] | WeeklyCheckIn | None)
