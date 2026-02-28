@@ -107,11 +107,12 @@ def get_goal_history(goal_id: str, db: Session = Depends(get_db)):
 
     history: list[GoalHistoryEntry] = []
     for version in db_goal.versions:
-        operation = GoalHistoryOperation[version.operation_type]
+        operation = GoalHistoryOperation(version.operation_type)
         issued_at: datetime.datetime = version.transaction.issued_at
         timestamp = (issued_at.isoformat() + "Z") if issued_at else ""
+        print(operation, operation == GoalHistoryOperation.CREATE)
 
-        if operation == "create":
+        if operation == GoalHistoryOperation.CREATE:
             # Include initial state for creation
             changes: dict[str, str | None] = {}
             for field in TRACKED_FIELDS:
