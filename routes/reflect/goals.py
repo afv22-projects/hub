@@ -105,10 +105,8 @@ def get_goal_history(goal_id: str, db: Session = Depends(get_db)):
     if not db_goal:
         raise HTTPException(404, f"Goal not found (id: {goal_id})")
 
-    versions = list(db_goal.versions)
     history: list[GoalHistoryEntry] = []
-
-    for version in versions:
+    for version in db_goal.versions:
         operation = OPERATION_TYPES.get(version.operation_type, "unknown")
         timestamp = (
             version.transaction.issued_at.isoformat()
