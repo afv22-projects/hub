@@ -110,7 +110,6 @@ def get_goal_history(goal_id: str, db: Session = Depends(get_db)):
         operation = GoalHistoryOperation(version.operation_type)
         issued_at: datetime.datetime = version.transaction.issued_at
         timestamp = (issued_at.isoformat() + "Z") if issued_at else ""
-        print(operation, operation == GoalHistoryOperation.CREATE)
 
         if operation == GoalHistoryOperation.CREATE:
             # Include initial state for creation
