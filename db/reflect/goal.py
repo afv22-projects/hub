@@ -1,4 +1,6 @@
+import time
 from typing import TYPE_CHECKING, Any, ClassVar
+import uuid
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
@@ -16,7 +18,9 @@ class DBGoal(Base):
     __tablename__ = "reflect--goal"
     __versioned__ = {}
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)  # UUID
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid.uuid4())
+    )
     title: Mapped[str] = mapped_column(String, nullable=False)
     priority: Mapped[GoalPriority] = mapped_column(
         SQLEnum(GoalPriority), nullable=False
@@ -24,7 +28,9 @@ class DBGoal(Base):
     exit_criteria: Mapped[str] = mapped_column(String, nullable=False)
     action_plan: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[GoalStatus] = mapped_column(SQLEnum(GoalStatus), nullable=False)
-    created_at: Mapped[int] = mapped_column(Integer, nullable=False)  # timestamp
+    created_at: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=lambda: int(time.time() * 1000)
+    )
     month_created: Mapped[str] = mapped_column(String, nullable=False)  # "YYYY-MM"
 
     # Relationships

@@ -34,7 +34,7 @@ class DBWeeklyCheckIn(Base):
     strategy_adjustment: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[int] = mapped_column(
         Integer, nullable=False, default=lambda: int(time.time() * 1000)
-    )  # timestamp in milliseconds
+    )
 
     # Relationships
     goal: Mapped["DBGoal"] = relationship(back_populates="weekly_check_ins")

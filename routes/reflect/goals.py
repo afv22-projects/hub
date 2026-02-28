@@ -1,6 +1,4 @@
 import datetime
-import time
-import uuid
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Depends, Query
@@ -21,20 +19,17 @@ router = APIRouter(prefix="/goals")
 
 @router.post("", response_model=dict)
 def create_goal(goal: GoalCreate, db: Session = Depends(get_db)):
-    goal_id = str(uuid.uuid4())
     db_goal = DBGoal(
-        id=goal_id,
         title=goal.title,
         priority=goal.priority,
         exit_criteria=goal.exit_criteria,
         action_plan=goal.action_plan,
         status=GoalStatus.ACTIVE,
-        created_at=int(time.time() * 1000),  # milliseconds
         month_created=goal.month_created,
     )
     db.add(db_goal)
     db.commit()
-    return {"id": goal_id}
+    return {"id": db_goal.id}
 
 
 @router.get("/{goal_id}", response_model=Goal)
