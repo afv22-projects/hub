@@ -38,5 +38,8 @@ class DBGoal(Base):
     # Added by sqlalchemy-history
     versions: ClassVar[list[Any]]
 
+    # Added by sqlalchemy-history
+    versions: ClassVar[list[Any]]
+
     def __repr__(self) -> str:
         return f"Goal(id={self.id}, title={self.title}, priority={self.priority}, status={self.status})"
