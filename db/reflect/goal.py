@@ -7,7 +7,7 @@ from db import Base
 from enums import GoalPriority, GoalStatus
 
 if TYPE_CHECKING:
-    from db.reflect import DBWeeklyCheckIn, DBGoalMonthOutcome, DBScratchpadNote
+    from db.reflect import DBWeeklyCheckIn, DBGoalMonthOutcome
 
 
 class DBGoal(Base):
@@ -32,9 +32,6 @@ class DBGoal(Base):
     )
     month_outcomes: Mapped[list["DBGoalMonthOutcome"]] = relationship(
         back_populates="goal", cascade="all, delete-orphan"
-    )
-    promoted_notes: Mapped[list["DBScratchpadNote"]] = relationship(
-        back_populates="promoted_goal"
     )
 
     def __repr__(self) -> str:

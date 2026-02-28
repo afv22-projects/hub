@@ -16,11 +16,10 @@ from db.pantry import (  # noqa: F401
     DBRecipe,
 )
 from db.reflect import (  # noqa: F401
-    Goal,
-    GoalMonthOutcome,
-    MonthlyReview,
-    ScratchpadNote,
-    WeeklyCheckIn,
+    DBGoal,
+    DBGoalMonthOutcome,
+    DBMonthlyReview,
+    DBWeeklyCheckIn,
 )
 
 # this is the Alembic Config object, which provides

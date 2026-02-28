@@ -3,11 +3,6 @@ from schemas.reflect.goal import (
     GoalCreate,
     GoalUpdate,
 )
-from schemas.reflect.scratchpad_note import (
-    ScratchpadNote,
-    ScratchpadNoteCreate,
-    ScratchpadNotePromote,
-)
 from schemas.reflect.weekly_check_in import (
     WeeklyCheckIn,
     WeeklyCheckInCreate,
@@ -21,7 +16,4 @@ __all__ = [
     "WeeklyCheckIn",
     "WeeklyCheckInCreate",
     "WeeklyCheckInUpdate",
-    "ScratchpadNote",
-    "ScratchpadNoteCreate",
-    "ScratchpadNotePromote",
 ]
