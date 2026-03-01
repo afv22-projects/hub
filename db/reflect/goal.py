@@ -1,22 +1,22 @@
 import time
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING
 import uuid
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
 
 from db import DBBase
+from db.mixins import VersionedMixin
 from enums import GoalPriority, GoalStatus
 
 if TYPE_CHECKING:
     from db.reflect import DBWeeklyCheckIn, DBGoalMonthOutcome
 
 
-class DBGoal(DBBase):
+class DBGoal(DBBase, VersionedMixin):
     """Represents a goal with priority, status, and tracking."""
 
     __tablename__ = "reflect--goal"
-    __versioned__ = {}
 
     id: Mapped[str] = mapped_column(
         String, primary_key=True, default=lambda: str(uuid.uuid4())
@@ -41,8 +41,7 @@ class DBGoal(DBBase):
         back_populates="goal", cascade="all, delete-orphan"
     )
 
-    # Added by sqlalchemy-history
-    versions: ClassVar[list[Any]]
+    versioned_fields = ["title", "priority", "exit_criteria", "action_plan", "status"]
 
     def __repr__(self) -> str:
         return f"Goal(id={self.id}, title={self.title}, priority={self.priority}, status={self.status})"

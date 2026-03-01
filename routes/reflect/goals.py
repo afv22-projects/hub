@@ -91,9 +91,6 @@ def get_goals(
     return query.all()
 
 
-TRACKED_FIELDS = ["title", "priority", "exit_criteria", "action_plan", "status"]
-
-
 @router.get("/{goal_id}/history", response_model=list[GoalHistoryEntry])
 def get_goal_history(goal_id: str, db: Session = Depends(get_db)):
     db_goal = db.get(DBGoal, goal_id)
@@ -109,7 +106,7 @@ def get_goal_history(goal_id: str, db: Session = Depends(get_db)):
         if operation == GoalHistoryOperation.CREATE:
             # Include initial state for creation
             changes: dict[str, str | None] = {}
-            for field in TRACKED_FIELDS:
+            for field in DBGoal.versioned_fields:
                 val = getattr(version, field, None)
                 changes[field] = str(val) if val is not None else None
             history.append(
@@ -122,7 +119,7 @@ def get_goal_history(goal_id: str, db: Session = Depends(get_db)):
         else:
             # For updates, only include changed fields
             changes = {}
-            for field in TRACKED_FIELDS:
+            for field in DBGoal.versioned_fields:
                 mod_flag = getattr(version, f"{field}_mod", False)
                 if mod_flag:
                     new_val = getattr(version, field, None)
