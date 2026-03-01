@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Boolean, String, Integer
 
-from db import Base
+from db import DBBase
 
 
-class DBItem(Base):
+class DBItem(DBBase):
     """Base class for all pantry items (ingredients, consumables, etc.)."""
 
     __tablename__ = "pantry--item"

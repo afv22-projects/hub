@@ -5,14 +5,14 @@ import uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
 
-from db import Base
+from db import DBBase
 from enums import GoalPriority, GoalStatus
 
 if TYPE_CHECKING:
     from db.reflect import DBWeeklyCheckIn, DBGoalMonthOutcome
 
 
-class DBGoal(Base):
+class DBGoal(DBBase):
     """Represents a goal with priority, status, and tracking."""
 
     __tablename__ = "reflect--goal"

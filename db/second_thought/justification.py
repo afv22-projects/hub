@@ -3,10 +3,10 @@ from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DateTime, String, Integer
 
-from db import Base
+from db import DBBase
 
 
-class Justification(Base):
+class Justification(DBBase):
     __tablename__ = "second_thought--justification"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

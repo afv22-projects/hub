@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import String, Integer
 
-from db import Base
+from db import DBBase
 
 
-class DBMonthlyReview(Base):
+class DBMonthlyReview(DBBase):
     """Represents a monthly review with key takeaways."""
 
     __tablename__ = "reflect--monthly_review"

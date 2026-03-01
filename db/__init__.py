@@ -17,12 +17,12 @@ engine = create_engine(DB_URI, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-class Base(DeclarativeBase): ...
+class DBBase(DeclarativeBase): ...
 
 
 def init_db():
     configure_mappers()
-    Base.metadata.create_all(engine)
+    DBBase.metadata.create_all(engine)
 
 
 def get_db():

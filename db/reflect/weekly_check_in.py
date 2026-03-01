@@ -6,14 +6,14 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
 
-from db import Base
+from db import DBBase
 from enums import TrackingStatus
 
 if TYPE_CHECKING:
     from db.reflect import DBGoal
 
 
-class DBWeeklyCheckIn(Base):
+class DBWeeklyCheckIn(DBBase):
     """Represents a weekly check-in for a goal."""
 
     __tablename__ = "reflect--weekly_check_in"

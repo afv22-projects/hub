@@ -3,14 +3,14 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, JSON
 
-from db import Base
+from db import DBBase
 from .recipe_ingredient_assoc import recipe_ingredient_assoc
 
 if TYPE_CHECKING:
     from .ingredient import DBIngredient
 
 
-class DBRecipe(Base):
+class DBRecipe(DBBase):
     __tablename__ = "pantry--recipe"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

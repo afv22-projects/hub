@@ -4,14 +4,14 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Enum as SQLEnum
 
-from db import Base
+from db import DBBase
 from enums import GoalOutcome
 
 if TYPE_CHECKING:
     from db.reflect import DBGoal
 
 
-class DBGoalMonthOutcome(Base):
+class DBGoalMonthOutcome(DBBase):
     """Represents the outcome of a goal for a specific month."""
 
     __tablename__ = "reflect--goal_month_outcome"
