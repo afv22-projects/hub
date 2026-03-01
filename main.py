@@ -11,7 +11,7 @@ load_dotenv()
 
 from db import init_db
 from logging_config import init_logging, get_uvicorn_log_config, set_request_id
-from routes import pantry_app, reflect_app, second_thought_app
+from routes import pantry_app, reflect_app
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
@@ -73,7 +73,6 @@ def health_check():
 
 app.mount("/pantry", pantry_app)
 app.mount("/reflect", reflect_app)
-app.mount("/second-thought", second_thought_app)
 
 
 if __name__ == "__main__":
