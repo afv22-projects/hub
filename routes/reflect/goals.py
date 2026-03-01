@@ -1,4 +1,3 @@
-import datetime
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Depends, Query
@@ -6,12 +5,12 @@ from sqlalchemy.orm import Session
 
 from db import get_db
 from db.reflect import DBGoal, DBWeeklyCheckIn
-from enums import GoalStatus, GoalHistoryOperation
+from enums import GoalStatus
 from schemas.reflect import (
     Goal,
     GoalCreate,
-    GoalHistoryEntry,
     GoalUpdate,
+    HistoryEntry,
 )
 
 router = APIRouter(prefix="/goals")
@@ -91,50 +90,13 @@ def get_goals(
     return query.all()
 
 
-@router.get("/{goal_id}/history", response_model=list[GoalHistoryEntry])
+@router.get("/{goal_id}/history", response_model=list[HistoryEntry])
 def get_goal_history(goal_id: str, db: Session = Depends(get_db)):
     db_goal = db.get(DBGoal, goal_id)
     if not db_goal:
         raise HTTPException(404, f"Goal not found (id: {goal_id})")
 
-    history: list[GoalHistoryEntry] = []
-    for version in db_goal.versions:
-        operation = GoalHistoryOperation(version.operation_type)
-        issued_at: datetime.datetime = version.transaction.issued_at
-        timestamp = (issued_at.isoformat() + "Z") if issued_at else ""
-
-        if operation == GoalHistoryOperation.CREATE:
-            # Include initial state for creation
-            changes: dict[str, str | None] = {}
-            for field in DBGoal.versioned_fields:
-                val = getattr(version, field, None)
-                changes[field] = str(val) if val is not None else None
-            history.append(
-                GoalHistoryEntry(
-                    timestamp=timestamp,
-                    operation=operation,
-                    changes=changes,
-                )
-            )
-        else:
-            # For updates, only include changed fields
-            changes = {}
-            for field in DBGoal.versioned_fields:
-                mod_flag = getattr(version, f"{field}_mod", False)
-                if mod_flag:
-                    new_val = getattr(version, field, None)
-                    changes[field] = str(new_val) if new_val is not None else None
-
-            if changes:
-                history.append(
-                    GoalHistoryEntry(
-                        timestamp=timestamp,
-                        operation=operation,
-                        changes=changes,
-                    )
-                )
-
-    return history
+    return db_goal.get_history()
 
 
 @router.get("/weekly-checkin/{week_of}", response_model=list[Goal])

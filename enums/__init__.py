@@ -5,7 +5,7 @@ from enums.reflect import (
     GoalStatus,
     TrackingStatus,
     GoalOutcome,
-    GoalHistoryOperation,
+    HistoryOperation,
 )
 
 __all__ = [
@@ -15,5 +15,5 @@ __all__ = [
     "GoalStatus",
     "TrackingStatus",
     "GoalOutcome",
-    "GoalHistoryOperation",
+    "HistoryOperation",
 ]

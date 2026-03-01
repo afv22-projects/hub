@@ -1,8 +1,6 @@
-from typing import Literal
-
 from pydantic import BaseModel, ConfigDict
 
-from enums import GoalPriority, GoalStatus, GoalHistoryOperation
+from enums import GoalPriority, GoalStatus, HistoryOperation
 
 
 class GoalBase(BaseModel):
@@ -33,7 +31,7 @@ class Goal(GoalBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class GoalHistoryEntry(BaseModel):
+class HistoryEntry(BaseModel):
     timestamp: str  # ISO 8601
-    operation: GoalHistoryOperation
+    operation: HistoryOperation
     changes: dict[str, str | None]  # field name -> new value

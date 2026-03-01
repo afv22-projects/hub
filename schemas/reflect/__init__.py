@@ -1,7 +1,7 @@
 from schemas.reflect.goal import (
     Goal,
     GoalCreate,
-    GoalHistoryEntry,
+    HistoryEntry,
     GoalUpdate,
 )
 from schemas.reflect.weekly_check_in import (
@@ -13,7 +13,7 @@ from schemas.reflect.weekly_check_in import (
 __all__ = [
     "Goal",
     "GoalCreate",
-    "GoalHistoryEntry",
+    "HistoryEntry",
     "GoalUpdate",
     "WeeklyCheckIn",
     "WeeklyCheckInCreate",

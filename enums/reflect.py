@@ -34,7 +34,7 @@ class GoalOutcome(str, Enum):
     PIVOTED = "pivoted"
 
 
-class GoalHistoryOperation(int, Enum):
+class HistoryOperation(int, Enum):
     CREATE = 0
     UPDATE = 1
     DELETE = 2
