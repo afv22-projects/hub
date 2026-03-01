@@ -13,7 +13,7 @@ class RecipeBase(BaseModel):
 class RecipeSummary(RecipeBase):
     """Recipe without nested ingredients to avoid circular references."""
 
-    id: int
+    id: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,6 +27,6 @@ class IngredientBase(BaseModel):
 class IngredientSummary(IngredientBase):
     """Ingredient without nested recipes to avoid circular references."""
 
-    id: int
+    id: str
 
     model_config = ConfigDict(from_attributes=True)

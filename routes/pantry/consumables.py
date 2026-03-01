@@ -11,7 +11,7 @@ router = APIRouter(prefix="/consumables")
 
 
 @router.get("/{id}", response_model=Consumable)
-def get_consumable(id: int, db: Session = Depends(get_db)):
+def get_consumable(id: str, db: Session = Depends(get_db)):
     db_consumable = db.get(DBConsumable, id)
     if not db_consumable:
         raise HTTPException(404, f"Consumable not found (id: {id})")
@@ -20,7 +20,7 @@ def get_consumable(id: int, db: Session = Depends(get_db)):
 
 @router.patch("/{id}", response_model=Consumable)
 def update_consumable(
-    id: int, consumable: ConsumableUpdate, db: Session = Depends(get_db)
+    id: str, consumable: ConsumableUpdate, db: Session = Depends(get_db)
 ):
     db_consumable = db.get(DBConsumable, id)
     if not db_consumable:
@@ -45,7 +45,7 @@ def update_consumable(
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_consumable(id: int, db: Session = Depends(get_db)):
+def delete_consumable(id: str, db: Session = Depends(get_db)):
     db_consumable = db.get(DBConsumable, id)
     if not db_consumable:
         raise HTTPException(404, f"Consumable not found (id: {id})")

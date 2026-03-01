@@ -10,7 +10,7 @@ router = APIRouter(prefix="/recipes")
 
 
 @router.post("/{id}/ingredients", response_model=Recipe)
-def add_ingredient_to_recipe(id: int, name: str, db: Session = Depends(get_db)):
+def add_ingredient_to_recipe(id: str, name: str, db: Session = Depends(get_db)):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
@@ -37,7 +37,7 @@ def add_ingredient_to_recipe(id: int, name: str, db: Session = Depends(get_db)):
 
 @router.delete("/{id}/ingredients", response_model=Recipe)
 def remove_ingredient_from_recipe(
-    id: int, ingredient: str, db: Session = Depends(get_db)
+    id: str, ingredient: str, db: Session = Depends(get_db)
 ):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
@@ -55,7 +55,7 @@ def remove_ingredient_from_recipe(
 
 
 @router.post("/{id}/sources", response_model=Recipe)
-def add_source_to_recipe(id: int, source: str, db: Session = Depends(get_db)):
+def add_source_to_recipe(id: str, source: str, db: Session = Depends(get_db)):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
@@ -66,7 +66,7 @@ def add_source_to_recipe(id: int, source: str, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}/sources", response_model=Recipe)
-def remove_source_from_recipe(id: int, source: str, db: Session = Depends(get_db)):
+def remove_source_from_recipe(id: str, source: str, db: Session = Depends(get_db)):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
@@ -79,7 +79,7 @@ def remove_source_from_recipe(id: int, source: str, db: Session = Depends(get_db
 
 
 @router.post("/{id}/tags", response_model=Recipe)
-def add_tag_to_recipe(id: int, tag: str, db: Session = Depends(get_db)):
+def add_tag_to_recipe(id: str, tag: str, db: Session = Depends(get_db)):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
@@ -90,7 +90,7 @@ def add_tag_to_recipe(id: int, tag: str, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}/tags", response_model=Recipe)
-def remove_tag_from_recipe(id: int, tag: str, db: Session = Depends(get_db)):
+def remove_tag_from_recipe(id: str, tag: str, db: Session = Depends(get_db)):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
@@ -103,7 +103,7 @@ def remove_tag_from_recipe(id: int, tag: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{id}", response_model=Recipe)
-def get_recipe(id: int, db: Session = Depends(get_db)):
+def get_recipe(id: str, db: Session = Depends(get_db)):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
@@ -111,7 +111,7 @@ def get_recipe(id: int, db: Session = Depends(get_db)):
 
 
 @router.patch("/{id}", response_model=Recipe)
-def update_recipe(id: int, recipe: RecipeUpdate, db: Session = Depends(get_db)):
+def update_recipe(id: str, recipe: RecipeUpdate, db: Session = Depends(get_db)):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")
@@ -126,7 +126,7 @@ def update_recipe(id: int, recipe: RecipeUpdate, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_recipe(id: int, db: Session = Depends(get_db)):
+def delete_recipe(id: str, db: Session = Depends(get_db)):
     db_recipe = db.get(DBRecipe, id)
     if not db_recipe:
         raise HTTPException(404, f"Recipe not found (id: {id})")

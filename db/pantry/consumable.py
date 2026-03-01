@@ -9,7 +9,7 @@ from enums import ConsumableCategory
 class DBConsumable(DBItem):
     __tablename__ = "pantry--consumable"
 
-    id: Mapped[int] = mapped_column(ForeignKey("pantry--item.id"), primary_key=True)
+    id: Mapped[str] = mapped_column(ForeignKey("pantry--item.id"), primary_key=True)
     category: Mapped[ConsumableCategory] = mapped_column(
         SQLEnum(ConsumableCategory), nullable=False, default=ConsumableCategory.OTHER
     )

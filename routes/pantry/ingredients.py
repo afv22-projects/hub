@@ -11,7 +11,7 @@ router = APIRouter(prefix="/ingredients")
 
 
 @router.get("/{id}", response_model=Ingredient)
-def get_ingredient(id: int, db: Session = Depends(get_db)):
+def get_ingredient(id: str, db: Session = Depends(get_db)):
     db_ingredient = db.get(DBIngredient, id)
     if not db_ingredient:
         raise HTTPException(404, f"Ingredient not found (id: {id})")
@@ -20,7 +20,7 @@ def get_ingredient(id: int, db: Session = Depends(get_db)):
 
 @router.patch("/{id}", response_model=Ingredient)
 def update_ingredient(
-    id: int, ingredient: IngredientUpdate, db: Session = Depends(get_db)
+    id: str, ingredient: IngredientUpdate, db: Session = Depends(get_db)
 ):
     db_ingredient = db.get(DBIngredient, id)
     if not db_ingredient:
@@ -45,7 +45,7 @@ def update_ingredient(
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_ingredient(id: int, db: Session = Depends(get_db)):
+def delete_ingredient(id: str, db: Session = Depends(get_db)):
     db_ingredient = db.get(DBIngredient, id)
     if not db_ingredient:
         raise HTTPException(404, f"Ingredient not found (id: {id})")

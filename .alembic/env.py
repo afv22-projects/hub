@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from db import Base
+from db import DBBase
 from logging_config import init_logging, InterceptHandler
 
 # Import all models so alembic can detect them
@@ -46,7 +46,7 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
+target_metadata = DBBase.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

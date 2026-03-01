@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class DBIngredient(DBItem):
     __tablename__ = "pantry--ingredient"
 
-    id: Mapped[int] = mapped_column(ForeignKey("pantry--item.id"), primary_key=True)
+    id: Mapped[str] = mapped_column(ForeignKey("pantry--item.id"), primary_key=True)
     category: Mapped[IngredientCategory] = mapped_column(
         SQLEnum(IngredientCategory), nullable=False, default=IngredientCategory.OTHER
     )
@@ -29,5 +29,5 @@ class DBIngredient(DBItem):
     )
 
     @property
-    def recipe_ids(self) -> list[int]:
+    def recipe_ids(self) -> list[str]:
         return [recipe.id for recipe in self.recipes]
