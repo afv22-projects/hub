@@ -19,7 +19,7 @@ make_versioned(
     plugins=[PropertyModTrackerPlugin()],
 )
 
-DB_URI = os.environ.get("DB_URI", "sqlite:///./app.db")
+DB_URI = os.environ.get("DB_URI", "sqlite:///.data/app.db")
 engine = create_engine(DB_URI, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
