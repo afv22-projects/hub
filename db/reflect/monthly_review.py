@@ -9,7 +9,6 @@ class DBMonthlyReview(DBBase):
 
     __tablename__ = "reflect--monthly_review"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)  # UUID
     month: Mapped[str] = mapped_column(String, nullable=False)  # "YYYY-MM"
     key_takeaway: Mapped[str] = mapped_column(String, nullable=False)
     finalized_at: Mapped[int | None] = mapped_column(Integer, nullable=True)

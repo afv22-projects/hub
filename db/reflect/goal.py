@@ -1,6 +1,5 @@
 import time
 from typing import TYPE_CHECKING
-import uuid
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
@@ -18,9 +17,6 @@ class DBGoal(DBBase, VersionedMixin):
 
     __tablename__ = "reflect--goal"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
-    )
     title: Mapped[str] = mapped_column(String, nullable=False)
     priority: Mapped[GoalPriority] = mapped_column(
         SQLEnum(GoalPriority), nullable=False

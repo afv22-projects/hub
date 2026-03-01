@@ -1,5 +1,4 @@
 import time
-import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
@@ -18,9 +17,6 @@ class DBWeeklyCheckIn(DBBase):
 
     __tablename__ = "reflect--weekly_check_in"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
-    )
     goal_id: Mapped[str] = mapped_column(
         String, ForeignKey("reflect--goal.id"), nullable=False
     )

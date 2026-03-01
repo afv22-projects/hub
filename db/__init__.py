@@ -1,7 +1,14 @@
 import os
+import uuid
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, configure_mappers, sessionmaker
+from sqlalchemy import String, create_engine
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    configure_mappers,
+    mapped_column,
+    sessionmaker,
+)
 from sqlalchemy_history import make_versioned
 from sqlalchemy_history.plugins import PropertyModTrackerPlugin
 
@@ -17,7 +24,10 @@ engine = create_engine(DB_URI, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-class DBBase(DeclarativeBase): ...
+class DBBase(DeclarativeBase):
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid.uuid4())
+    )
 
 
 def init_db():

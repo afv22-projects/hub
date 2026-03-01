@@ -16,7 +16,6 @@ class DBGoalMonthOutcome(DBBase):
 
     __tablename__ = "reflect--goal_month_outcome"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)  # UUID
     goal_id: Mapped[str] = mapped_column(
         String, ForeignKey("reflect--goal.id"), nullable=False
     )
