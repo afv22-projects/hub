@@ -23,7 +23,7 @@ class VersionedMixin:
             issued_at: datetime.datetime = version.transaction.issued_at
             timestamp = (issued_at.isoformat() + "Z") if issued_at else ""
 
-            if operation == HistoryOperation.CREATE:
+            if operation == HistoryOperation.INSERT:
                 # Include initial state for creation
                 changes: dict[str, str | None] = {}
                 for field in self.versioned_fields:

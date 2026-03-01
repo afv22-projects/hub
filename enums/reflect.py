@@ -1,5 +1,7 @@
 from enum import Enum
 
+from sqlalchemy_history import Operation
+
 
 class GoalPriority(str, Enum):
     """Priority levels for goals."""
@@ -35,6 +37,6 @@ class GoalOutcome(str, Enum):
 
 
 class HistoryOperation(int, Enum):
-    CREATE = 0
-    UPDATE = 1
-    DELETE = 2
+    INSERT = Operation.INSERT
+    UPDATE = Operation.UPDATE
+    DELETE = Operation.DELETE
