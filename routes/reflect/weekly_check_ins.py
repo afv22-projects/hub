@@ -26,7 +26,7 @@ def create_weekly_checkin(checkin: WeeklyCheckInCreate, db: Session = Depends(ge
     return {"id": db_checkin.id}
 
 
-@router.get("", response_model=list[WeeklyCheckIn] | WeeklyCheckIn | None)
+@router.get("", response_model=list[WeeklyCheckIn] | None)
 def get_weekly_checkins(
     goal_id: str | None = Query(None),
     week_of: str | None = Query(None),
@@ -39,9 +39,6 @@ def get_weekly_checkins(
 
     if week_of:
         query = query.filter(DBWeeklyCheckIn.week_of == week_of)
-
-    if goal_id and week_of:
-        return query.first()
 
     return query.order_by(DBWeeklyCheckIn.week_of).all()
 
