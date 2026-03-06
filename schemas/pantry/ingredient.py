@@ -15,6 +15,6 @@ class IngredientUpdate(BaseModel):
 
 class Ingredient(IngredientBase):
     id: str
-    recipes: list[RecipeSummary] = []
+    recipes: list[RecipeSummary]
 
     model_config = ConfigDict(from_attributes=True)
