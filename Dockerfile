@@ -26,4 +26,4 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:3001/health').read()" || exit 1
 
-CMD ["sh", "-c", "alembic upgrade head && python3 main.py"]
+CMD ["sh", "-c", "alembic upgrade head && python3 src/hub/main.py"]
