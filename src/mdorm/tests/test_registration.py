@@ -2,8 +2,8 @@ import tempfile
 from pathlib import Path
 from typing import Annotated
 
-from src.mdorm import MarkdownModel, MDorm
-from src.mdorm.fields import IntegerSpec, SectionSpec
+from mdorm import MarkdownModel, MDorm
+from mdorm.fields import IntegerSpec, SectionSpec
 
 
 class SampleModel(MarkdownModel):

@@ -1,8 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import Any
 import re
 
+from abc import ABC, abstractmethod
+from enum import Enum
+from typing import Any
+
 import sqlalchemy as db
+from sqlalchemy.sql.type_api import TypeEngine as TypeEngine
 
 
 class FieldSpec(ABC):
@@ -41,6 +44,23 @@ class BooleanSpec(FieldSpec):
         return db.Boolean()
 
 
+class EnumSpec(FieldSpec):
+    """EnumSpec field stored in frontmatter."""
+
+    def __init__(self, EnumType: type[Enum]) -> None:
+        self.EnumType = EnumType
+
+    @property
+    def db_type(self) -> TypeEngine:
+        return db.String(255)
+
+    def serialize(self, value: Enum, field_name: str) -> str:
+        return value.value
+
+    def deserialize(self, value: str, field_name: str) -> Enum:
+        return self.EnumType(value)
+
+
 class IntegerSpec(FieldSpec):
     """IntegerSpec field stored in frontmatter."""
 
@@ -77,9 +97,6 @@ class SectionSpec(SectionMixin):
 
     def serialize(self, value: str, field_name: str) -> str:
         return self._serialize(value, field_name)
-
-    def deserialize(self, value: str, field_name: str) -> str:
-        return value
 
 
 class RelationMixin:
