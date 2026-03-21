@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Annotated
 
 import pytest
+import sqlalchemy as db
 
 from mdorm import MarkdownModel, MDorm
 from mdorm.fields import SectionSpec, StringSpec
@@ -347,3 +348,141 @@ class TestSectionsIntegration:
             assert "summary: My summary" not in raw_content
             # Regular fields should be in frontmatter
             assert "tags: tag1" in raw_content
+
+
+class TestQueryFilter:
+    """Tests for query() with filter support."""
+
+    def test_query_filter_by_string_field(self):
+        """Verify query() can filter by a string field equality."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_orm = MDorm(Path(tmpdir))
+
+            db_orm.create(Note(title="note1", content="Content 1", tags="python"))
+            db_orm.create(Note(title="note2", content="Content 2", tags="rust"))
+            db_orm.create(Note(title="note3", content="Content 3", tags="python"))
+
+            table = db_orm.cache.metadata.tables["Note"]
+            results = db_orm.query(Note, filter=table.c.tags == "python")
+
+            assert len(results) == 2
+            titles = {r.title for r in results}
+            assert titles == {"note1", "note3"}
+
+    def test_query_filter_by_content(self):
+        """Verify query() can filter by content field."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_orm = MDorm(Path(tmpdir))
+
+            db_orm.create(Note(title="note1", content="Hello world", tags=""))
+            db_orm.create(Note(title="note2", content="Goodbye world", tags=""))
+            db_orm.create(Note(title="note3", content="Hello again", tags=""))
+
+            table = db_orm.cache.metadata.tables["Note"]
+            results = db_orm.query(Note, filter=table.c.content.like("Hello%"))
+
+            assert len(results) == 2
+            titles = {r.title for r in results}
+            assert titles == {"note1", "note3"}
+
+    def test_query_filter_with_and_condition(self):
+        """Verify query() supports AND conditions."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_orm = MDorm(Path(tmpdir))
+
+            db_orm.create(Note(title="note1", content="Python guide", tags="python"))
+            db_orm.create(Note(title="note2", content="Rust guide", tags="rust"))
+            db_orm.create(Note(title="note3", content="Python tips", tags="python"))
+            db_orm.create(Note(title="note4", content="Python guide", tags="beginner"))
+
+            table = db_orm.cache.metadata.tables["Note"]
+            results = db_orm.query(
+                Note,
+                filter=db.and_(
+                    table.c.tags == "python",
+                    table.c.content.like("%guide%"),
+                ),
+            )
+
+            assert len(results) == 1
+            assert results[0].title == "note1"
+
+    def test_query_filter_with_or_condition(self):
+        """Verify query() supports OR conditions."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_orm = MDorm(Path(tmpdir))
+
+            db_orm.create(Note(title="note1", content="Content", tags="python"))
+            db_orm.create(Note(title="note2", content="Content", tags="rust"))
+            db_orm.create(Note(title="note3", content="Content", tags="go"))
+
+            table = db_orm.cache.metadata.tables["Note"]
+            results = db_orm.query(
+                Note,
+                filter=db.or_(
+                    table.c.tags == "python",
+                    table.c.tags == "rust",
+                ),
+            )
+
+            assert len(results) == 2
+            titles = {r.title for r in results}
+            assert titles == {"note1", "note2"}
+
+    def test_query_filter_no_matches(self):
+        """Verify query() returns empty list when filter matches nothing."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_orm = MDorm(Path(tmpdir))
+
+            db_orm.create(Note(title="note1", content="Content", tags="python"))
+            db_orm.create(Note(title="note2", content="Content", tags="rust"))
+
+            table = db_orm.cache.metadata.tables["Note"]
+            results = db_orm.query(Note, filter=table.c.tags == "javascript")
+
+            assert len(results) == 0
+
+    def test_query_filter_with_section_model(self):
+        """Verify query() filter works with models that have section fields."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_orm = MDorm(Path(tmpdir))
+
+            db_orm.create(
+                NoteWithSections(
+                    title="note1",
+                    content="Body",
+                    notes="Some notes",
+                    tags="important",
+                )
+            )
+            db_orm.create(
+                NoteWithSections(
+                    title="note2",
+                    content="Body",
+                    notes="Other notes",
+                    tags="draft",
+                )
+            )
+
+            table = db_orm.cache.metadata.tables["NoteWithSections"]
+            results = db_orm.query(
+                NoteWithSections,
+                filter=table.c.tags == "important",
+            )
+
+            assert len(results) == 1
+            assert results[0].title == "note1"
+            assert results[0].notes == "Some notes"
+
+    def test_query_without_filter_returns_all(self):
+        """Verify query() without filter returns all records."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_orm = MDorm(Path(tmpdir))
+
+            db_orm.create(Note(title="note1", content="Content 1", tags="a"))
+            db_orm.create(Note(title="note2", content="Content 2", tags="b"))
+            db_orm.create(Note(title="note3", content="Content 3", tags="c"))
+
+            results = db_orm.query(Note)
+
+            assert len(results) == 3
