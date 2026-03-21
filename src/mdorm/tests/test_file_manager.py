@@ -207,42 +207,6 @@ Some notes.
             assert result.title == original.title
             assert result.draft == original.draft
 
-    def test_read_all_with_sections(self):
-        """Verify read_all correctly parses section fields from multiple files."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            model_dir = Path(tmpdir) / "ArticleWithSections"
-            model_dir.mkdir()
-
-            (model_dir / "first").write_text(
-                """---
-draft: false
----
-<!-- section: notes -->
-First notes
-"""
-            )
-            (model_dir / "second").write_text(
-                """---
-draft: true
----
-Body content
-
-<!-- section: summary -->
-Second summary
-"""
-            )
-
-            fm = FileManager(Path(tmpdir))
-            results = fm.read_all(ArticleWithSections)
-
-            first = next(r for r in results if r.title == "first")
-            second = next(r for r in results if r.title == "second")
-
-            assert first.notes == "First notes"
-            assert first.content == ""
-            assert second.summary == "Second summary"
-            assert second.content == "Body content"
-
     def test_section_default_value(self):
         """Verify section fields use default when not in markdown."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -296,43 +260,6 @@ This is the body.
 
             with pytest.raises(FileNotFoundError):
                 fm.read(Article, "missing")
-
-
-class TestReadAll:
-    def test_read_all_loads_all_files(self):
-        """Verify read_all() loads all markdown files for a model."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            model_dir = Path(tmpdir) / "Article"
-            model_dir.mkdir()
-
-            (model_dir / "first.md").write_text(
-                """---
-draft: false
----
-Content 1
-"""
-            )
-            (model_dir / "second.md").write_text(
-                """---
-draft: true
----
-Content 2
-"""
-            )
-
-            fm = FileManager(Path(tmpdir))
-            results = fm.read_all(Article)
-
-            assert len(results) == 2
-            titles = {r.title for r in results}
-            assert titles == {"first", "second"}
-
-    def test_read_all_empty_directory(self):
-        """Verify read_all() returns empty list when no files exist."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
-            results = fm.read_all(Article)
-            assert results == []
 
 
 class TestWrite:
@@ -477,34 +404,6 @@ Content.
 
             assert "Expected [[Author/...]]" in str(exc_info.value)
             assert "found [[WrongModel/...]]" in str(exc_info.value)
-
-    def test_read_all_parses_wiki_links(self):
-        """Verify read_all() parses wiki links in all files."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            model_dir = Path(tmpdir) / "Recipe"
-            model_dir.mkdir()
-
-            (model_dir / "pasta.md").write_text(
-                """---
-author: "[[Author/John Smith]]"
----
-Pasta recipe.
-"""
-            )
-            (model_dir / "soup.md").write_text(
-                """---
-author: "[[Author/Jane Doe]]"
----
-Soup recipe.
-"""
-            )
-
-            fm = FileManager(Path(tmpdir))
-            results = fm.read_all(Recipe)
-
-            authors = {r.title: r.author for r in results}
-            assert authors["pasta"] == "John Smith"
-            assert authors["soup"] == "Jane Doe"
 
     def test_relation_field_missing_in_file(self):
         """Verify read() handles missing relation field gracefully."""

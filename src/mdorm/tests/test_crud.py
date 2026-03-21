@@ -66,7 +66,7 @@ class TestUpdate:
             db = MDorm(Path(tmpdir))
 
             note = Note(title="missing", content="", tags="")
-            with pytest.raises(KeyError):
+            with pytest.raises(FileNotFoundError):
                 db.update(note)
 
 

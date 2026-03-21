@@ -268,8 +268,8 @@ Graceful handling of constraint violations with specific error types.
 
 ### Phase 3: Constraints & Validation (Required)
 
-7. **Unique constraints** - Field-level uniqueness validation
-8. **Upsert operation** - `db.upsert(obj)` method
+7. **✅ Unique constraints** - Field-level uniqueness validation
+8. **✅ Upsert operation** - `db.upsert(obj)` method
 
 ### Phase 4: Migration Helpers (Recommended)
 
@@ -289,7 +289,7 @@ Graceful handling of constraint violations with specific error types.
 | ------- | ----------------------------------------- | ---------- |
 | Phase 1 | ~~EnumSpec~~, ~~ListSpec~~, ~~Filtering~~ | Medium     |
 | Phase 2 | Bidirectional many-to-many sync           | High       |
-| Phase 3 | Unique constraints, API cleanup           | Low-Medium |
+| Phase 3 | Unique constraints, ~~API cleanup~~       | Low-Medium |
 | Phase 4 | Cascade title updates, Migration scripts  | Medium     |
 | Phase 5 | Polymorphism, Compound filters            | High       |
 

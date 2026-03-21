@@ -57,10 +57,7 @@ class FileManager:
             field_values[name] = spec.deserialize(raw, name)
 
         # Get frontmatter fields that don't have specs (shouldn't happen, but safe)
-        metadata = {
-            k: v for k, v in post.metadata.items()
-            if k not in specs
-        }
+        metadata = {k: v for k, v in post.metadata.items() if k not in specs}
 
         return Model(
             **metadata,
@@ -69,6 +66,10 @@ class FileManager:
             content=body_sections["content"],
             mtime=file.stat().st_mtime,
         )
+
+    def exists(self, obj: MarkdownModel) -> bool:
+        file = self.models_dir / obj.__class__.__name__ / (obj.title + ".md")
+        return file.exists()
 
     def get_mtime(self, Model: type[T], title: str) -> float | None:
         file = self.models_dir / Model.__name__ / (title + ".md")
@@ -89,17 +90,13 @@ class FileManager:
         else:
             yield from ()
 
-    def read_all(self, Model: type[T]) -> list[T]:
-        return [self._load_file(Model, file) for file in self.list_files(Model)]
-
     def write(self, obj: MarkdownModel) -> float:
         model_dir = self.models_dir / obj.__class__.__name__
         if not model_dir.exists():
             model_dir.mkdir()
 
         file = model_dir / (obj.title + ".md")
-        if not file.exists():
-            file.touch()
+        file.touch(exist_ok=True)
 
         # Serialize frontmatter fields
         fm_fields = {}

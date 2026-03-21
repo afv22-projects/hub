@@ -21,8 +21,18 @@ class MDorm:
         # Load existing objects into db
         if not lazy_load:
             for Model in MarkdownModel._registry.values():
-                for obj in self.files.read_all(Model):
-                    self.cache.create(obj)
+                self._sync(Model)
+
+    def _sync(self, Model: type[T]) -> None:
+        current_titles = set(file.stem for file in self.files.list_files(Model))
+        cached_titles = set(obj.title for obj in self.cache.get_rows(Model))
+
+        for title in current_titles - cached_titles:
+            obj = self.files.read(Model, title)
+            self.cache.create(obj)
+
+        for title in cached_titles - current_titles:
+            self.cache.delete(Model, title)
 
     def get_or_none(self, Model: type[T], title: str) -> T | None:
         current_mtime = self.files.get_mtime(Model, title)
@@ -40,13 +50,14 @@ class MDorm:
 
         return cached_obj
 
-    def get(self, model: type[T], title: str) -> T:
-        obj = self.get_or_none(model, title)
+    def get(self, Model: type[T], title: str) -> T:
+        obj = self.get_or_none(Model, title)
         if not obj:
             raise FileNotFoundError()
         return obj
 
     def query(self, Model: type[T], filter: Filter | None = None) -> list[T]:
+        self._sync(Model)
         cached_objs = self.cache.get_rows(Model, filter)
         result: list[T] = []
 
@@ -65,14 +76,23 @@ class MDorm:
         return result
 
     def create(self, obj: MarkdownModel) -> None:
+        if self.files.exists(obj):
+            raise FileExistsError()
         mtime = self.files.write(obj)
         obj.mtime = mtime
         self.cache.create(obj)
 
     def update(self, obj: MarkdownModel) -> None:
+        if not self.files.exists(obj):
+            raise FileNotFoundError()
         mtime = self.files.write(obj)
         obj.mtime = mtime
         self.cache.update(obj)
+
+    def upsert(self, obj: MarkdownModel) -> None:
+        mtime = self.files.write(obj)
+        obj.mtime = mtime
+        self.cache.upsert(obj)
 
     def delete(self, Model: type[MarkdownModel], title: str) -> None:
         self.files.delete(Model, title)
