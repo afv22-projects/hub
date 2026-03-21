@@ -4,8 +4,8 @@ from typing import Annotated
 
 import pytest
 
-from src import MarkdownModel, MDorm
-from src.fields import SectionSpec, StringSpec
+from src.mdorm import MarkdownModel, MDorm
+from src.mdorm.fields import SectionSpec, StringSpec
 
 
 class Note(MarkdownModel):

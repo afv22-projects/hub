@@ -4,9 +4,9 @@ from typing import Annotated
 
 import pytest
 
-from src import MarkdownModel
-from src.fields import BooleanSpec, RelationToOne, SectionSpec
-from src.file_manager import FileManager
+from src.mdorm import MarkdownModel
+from src.mdorm.fields import BooleanSpec, RelationToOne, SectionSpec
+from src.mdorm.file_manager import FileManager
 
 
 class Article(MarkdownModel):
