@@ -112,7 +112,4 @@ class FileManager:
 
     def delete(self, Model: type[MarkdownModel], title: str) -> None:
         file = self.models_dir / Model.__name__ / (title + ".md")
-        if not file.exists():
-            raise FileNotFoundError()
-
         file.unlink()
