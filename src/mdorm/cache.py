@@ -7,6 +7,7 @@ from .model import MarkdownModel
 
 
 T = TypeVar("T", bound=MarkdownModel)
+type Filter = db.ColumnElement[bool]
 
 
 class Cache:
@@ -41,9 +42,12 @@ class Cache:
             row = conn.execute(table.select().where(table.c.title == title)).fetchone()
         return Model(**row._mapping) if row else None
 
-    def all_rows(self, Model: type[T]) -> list[T]:
+    def get_rows(self, Model: type[T], filter: Filter | None = None) -> list[T]:
         with self._connect(Model) as (conn, table):
-            rows = conn.execute(table.select()).fetchall()
+            query = table.select()
+            if filter is not None:
+                query = query.where(filter)
+            rows = conn.execute(query).fetchall()
         return [Model(**row._mapping) for row in rows]
 
     def create(self, obj: MarkdownModel) -> None:

@@ -314,7 +314,7 @@ class TestSectionsIntegration:
                 )
             )
 
-            results = db.all(NoteWithSections)
+            results = db.query(NoteWithSections)
             assert len(results) == 2
 
             note1 = next(n for n in results if n.title == "note1")

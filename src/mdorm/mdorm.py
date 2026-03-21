@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import TypeVar
 
-from .cache import Cache
+from .cache import Cache, Filter
 from .file_manager import FileManager
 from .model import MarkdownModel
 
@@ -46,12 +46,23 @@ class MDorm:
             raise FileNotFoundError()
         return obj
 
-    def all(self, Model: type[T]) -> list[T]:
-        return [
-            obj
-            for title in self.files.list_files(Model)
-            if (obj := self.get_or_none(Model, title.stem))
-        ]
+    def query(self, Model: type[T], filter: Filter | None = None) -> list[T]:
+        cached_objs = self.cache.get_rows(Model, filter)
+        result: list[T] = []
+
+        for obj in cached_objs:
+            current_mtime = self.files.get_mtime(Model, obj.title)
+            if not current_mtime:
+                self.cache.delete(Model, obj.title)
+                continue
+
+            if obj.mtime < current_mtime:
+                obj = self.files.read(Model, obj.title)
+                self.cache.upsert(obj)
+
+            result.append(obj)
+
+        return result
 
     def create(self, obj: MarkdownModel) -> None:
         mtime = self.files.write(obj)

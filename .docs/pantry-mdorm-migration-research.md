@@ -4,7 +4,7 @@
 
 This report analyzes the feasibility of migrating the pantry module from SQLAlchemy to mdorm. The pantry module is a food/recipe management system with complex relationships and inheritance patterns. mdorm is a lightweight markdown-based ORM with Pydantic integration.
 
-**Key Finding:** mdorm currently supports ~40% of the features needed for pantry. Several significant features must be built before migration is feasible.
+**Key Finding:** mdorm currently supports ~60% of the features needed for pantry. With EnumSpec and ListSpec now complete, the main remaining gaps are filtering/querying, bidirectional many-to-many sync, and unique constraints.
 
 ---
 
@@ -42,24 +42,24 @@ DBBase (Abstract base with UUID primary key)
 
 ### 2.1 Model Features
 
-| Feature                 | Pantry Usage                        | mdorm Support               | Gap            |
-| ----------------------- | ----------------------------------- | --------------------------- | -------------- |
-| UUID primary keys       | All models use UUID PKs             | Uses `title` (string) as PK | **Needs work** |
-| Unique constraints      | `name` field on items               | Not supported               | **Needs work** |
-| Enum fields             | `category` on Consumable/Ingredient | Not supported               | **Needs work** |
-| Boolean fields          | `needed` on DBItem                  | `BooleanSpec`               | Supported      |
-| String fields           | `name`, `notes`                     | `StringSpec`                | Supported      |
-| JSON/List fields        | `sources`, `tags` on Recipe         | Not supported               | **Needs work** |
-| Polymorphic inheritance | DBItem → DBConsumable/DBIngredient  | Not supported               | **Needs work** |
+| Feature                 | Pantry Usage                        | mdorm Support               | Gap                 |
+| ----------------------- | ----------------------------------- | --------------------------- | ------------------- |
+| UUID primary keys       | All models use UUID PKs             | Uses `title` (string) as PK | Intentional design  |
+| Unique constraints      | `name` field on items               | Not supported               | **Needs work**      |
+| Enum fields             | `category` on Consumable/Ingredient | `EnumSpec`                  | ✅ Supported        |
+| Boolean fields          | `needed` on DBItem                  | `BooleanSpec`               | ✅ Supported        |
+| String fields           | `name`, `notes`                     | `StringSpec`                | ✅ Supported        |
+| JSON/List fields        | `sources`, `tags` on Recipe         | `ListSpec`                  | ✅ Supported        |
+| Polymorphic inheritance | DBItem → DBConsumable/DBIngredient  | Not supported               | Nice to have (skip) |
 
 ### 2.2 Relationship Features
 
-| Feature                | Pantry Usage                               | mdorm Support        | Gap            |
-| ---------------------- | ------------------------------------------ | -------------------- | -------------- |
-| Many-to-Many           | Recipe ↔ Ingredient                        | Not supported        | **Needs work** |
-| Association tables     | `recipe_ingredient_assoc`                  | Not supported        | **Needs work** |
+| Feature                | Pantry Usage                               | mdorm Support            | Gap            |
+| ---------------------- | ------------------------------------------ | ------------------------ | -------------- |
+| Many-to-Many           | Recipe ↔ Ingredient                        | Not supported            | **Needs work** |
+| Association tables     | `recipe_ingredient_assoc`                  | Not supported            | **Needs work** |
 | Back-references        | `ingredient.recipes`, `recipe.ingredients` | `RelationToOneSpec` only | **Needs work** |
-| Relationship traversal | `db_ingredient.recipes`                    | Not supported        | **Needs work** |
+| Relationship traversal | `db_ingredient.recipes`                    | Not supported            | **Needs work** |
 
 ### 2.3 Query Features
 
@@ -79,16 +79,17 @@ DBBase (Abstract base with UUID primary key)
 | Read                    | `db.get()`, `db.query()`      | `db.get()`, `db.all()` | Partial        |
 | Update                  | Modify + `db.commit()`        | `db.update()`          | Supported      |
 | Delete                  | `db.delete()` + `db.commit()` | `db.delete()`          | Supported      |
-| Upsert                  | Manual check + create/update  | Not supported          | **Needs work** |
+| Upsert                  | Manual check + create/update  | `update()` is upsert   | API cleanup    |
 | IntegrityError handling | Duplicate name detection      | Not supported          | **Needs work** |
 
 ### 2.5 Advanced Features
 
-| Feature         | Pantry Usage         | mdorm Support        | Gap            |
-| --------------- | -------------------- | -------------------- | -------------- |
-| Transactions    | Implicit via session | Basic SQLite commits | Partial        |
-| Cascade deletes | Relationship cleanup | Not supported        | **Needs work** |
-| Validation      | Pydantic schemas     | Pydantic-based       | Supported      |
+| Feature               | Pantry Usage         | mdorm Support        | Gap            |
+| --------------------- | -------------------- | -------------------- | -------------- |
+| Transactions          | Implicit via session | Basic SQLite commits | Partial        |
+| Cascade deletes       | Relationship cleanup | Not supported        | Not needed     |
+| Cascade title updates | N/A (UUID-based)     | Not supported        | **Needs work** |
+| Validation            | Pydantic schemas     | Pydantic-based       | ✅ Supported   |
 
 ---
 
@@ -96,9 +97,7 @@ DBBase (Abstract base with UUID primary key)
 
 ### 3.1 Critical Gaps (Must Build)
 
-#### 1. Many-to-Many Relationships
-
-**AFV:** MDorm already has a one-to-many called RelationToManySpec. Is the only difference between that and a many-to-many field type the back-population?
+#### 1. Many-to-Many Relationships (Bidirectional Sync)
 
 **Current pantry usage:**
 
@@ -118,11 +117,10 @@ class DBRecipe:
     ingredients: Mapped[list["DBIngredient"]] = relationship(back_populates="recipes")
 ```
 
-**mdorm gap:** Only has `RelationToOneSpec` for single references. Needs:
+**mdorm status:** Has `RelationToManySpec` for one-to-many relationships. For true many-to-many, needs:
 
-- `RelationToManySpec` with bidirectional sync
-- Storage format for many-to-many (inline list or separate association files)
-- Automatic back-reference population
+- **Bidirectional sync**: When Recipe A is added to Ingredient X's `recipes`, Ingredient X should auto-appear in Recipe A's `ingredients`
+- Automatic back-reference population on read
 
 #### 2. Filtering/Querying
 
@@ -139,7 +137,7 @@ db.query(DBRecipe).filter_by(name=name).one_or_none()
 - Index support for efficient filtering
 - Compound filters (AND/OR)
 
-#### 3. Enum Field Support
+#### 3. ✅ Enum Field Support (Completed)
 
 **Current pantry usage:**
 
@@ -148,13 +146,9 @@ class DBConsumable(DBItem):
     category: Mapped[ConsumableCategory] = mapped_column(Enum(ConsumableCategory))
 ```
 
-**mdorm gap:** No enum field spec. Needs:
+**mdorm support:** `EnumSpec(EnumClass)` field type with serialization to/from string in frontmatter and validation against enum values.
 
-- `EnumSpec(EnumClass)` field type
-- Serialization to/from string in frontmatter
-- Validation against enum values
-
-#### 4. List/JSON Fields
+#### 4. ✅ List/JSON Fields (Completed)
 
 **Current pantry usage:**
 
@@ -164,10 +158,7 @@ class DBRecipe:
     tags: Mapped[list] = mapped_column(JSON, default=list)
 ```
 
-**mdorm gap:** No list/JSON field support. Needs:
-
-- `ListSpec()` for simple string lists
-- Serialization format (comma-separated in frontmatter, or YAML list)
+**mdorm support:** `ListSpec()` for simple string lists with YAML list serialization in frontmatter.
 
 #### 5. Unique Constraints
 
@@ -186,9 +177,7 @@ class DBItem:
 
 ### 3.2 Moderate Gaps (Should Build)
 
-#### 6. Polymorphic Inheritance
-
-**AFV:** This is a nice to have at my scale. If turning MDorm into a producion tool, it would be more necessary, but for now we can just define each model separately.
+#### 6. Polymorphic Inheritance (Nice to Have)
 
 **Current pantry usage:**
 
@@ -200,11 +189,9 @@ class DBConsumable(DBItem):
     __mapper_args__ = {"polymorphic_identity": "consumable"}
 ```
 
-**Workaround possible:** Could use separate model classes without inheritance, duplicating shared fields. Less elegant but functional.
+**Decision:** At current scale, separate model classes without inheritance is acceptable. Shared fields can be duplicated across models. This is less elegant but functional and avoids complexity. Polymorphic inheritance can be revisited if mdorm becomes a production tool.
 
-#### 7. Upsert Operations
-
-**AFV:** Technically mdorm's update is an upsert since it just writes the obj passed to it to the file. I need to clean up the API here to make behavior more expected.
+#### 7. Upsert Operations (API Cleanup Needed)
 
 **Current pantry usage:**
 
@@ -217,33 +204,26 @@ else:
     # create
 ```
 
-**mdorm gap:** No built-in upsert. Needs:
+**mdorm status:** The `update()` method already behaves as upsert (writes object to file regardless of prior existence). API should be clarified to make this behavior explicit - consider renaming to `save()` or documenting upsert semantics clearly.
 
-- `db.upsert(obj)` method
-- Or could be implemented at application layer
-
-#### 8. UUID vs Title as Primary Key
-
-**AFV:** Using the title as the key was a design decision. It will require updating the front end too to support no UUIDs, but this was intentional.
+#### 8. UUID vs Title as Primary Key (Intentional Design)
 
 **Current pantry usage:** All models use UUID primary keys.
 **mdorm design:** Uses `title` (filename) as primary key.
 
-**Options:**
-
-- Use name/title as PK (breaking change for API)
-- Add UUID field support to mdorm
-- Store UUID in frontmatter, keep title as filename
+**Decision:** Using title as primary key is an intentional design choice for mdorm. This provides human-readable file organization and simpler mental model. Migration will require frontend updates to work with title-based keys instead of UUIDs.
 
 ### 3.3 Minor Gaps (Nice to Have)
 
-**AFV:** Another consideration is handling ingredient name changes. If I update the title of an ingredient, we should probably cascade that change to relevent recipes.
+#### 9. Cascade Title Updates
 
-#### 9. Cascade Deletes
+When an ingredient's title (primary key) changes, references in related recipes become stale. mdorm should support cascading title updates to maintain referential integrity.
 
-When deleting an ingredient, should it be removed from all recipes?
+**Implementation options:**
 
-**AFV:** No. The core motivation of MDorm is to have persistent, human-readable files for future use.
+- Hook into rename/update operations to find and update all references
+- Store references by title and update related files when title changes
+- Provide a `rename()` method that handles cascade updates
 
 #### 10. Integrity Error Handling
 
@@ -262,8 +242,11 @@ Graceful handling of constraint violations with specific error types.
 | Boolean fields       | `BooleanSpec()`                                      |
 | Integer fields       | `IntegerSpec()`                                      |
 | String fields        | `StringSpec(max_length=...)`                         |
+| Enum fields          | `EnumSpec(EnumClass)`                                |
+| List fields          | `ListSpec()` for string lists                        |
 | Section fields       | `SectionSpec()` for body content                     |
-| Single relations     | `RelationToOneSpec("ModelName")`                         |
+| Single relations     | `RelationToOneSpec("ModelName")`                     |
+| Many relations       | `RelationToManySpec("ModelName")`                    |
 | Model registration   | Auto-registration via metaclass                      |
 | Lazy loading         | `MDorm(path, lazy_load=True)`                        |
 
@@ -273,9 +256,9 @@ Graceful handling of constraint violations with specific error types.
 
 ### Phase 1: Core Field Types (Required)
 
-1. **EnumSpec** - Enum field support with validation
-2. **ListSpec** - Simple list storage in frontmatter
-3. **Filtering** - `db.filter(Model, **kwargs)` for field-based queries
+1. **✅ EnumSpec** - Enum field support with validation
+2. **✅ ListSpec** - Simple list storage in frontmatter
+3. **✅ Filtering** - `db.filter(Model, **kwargs)` for field-based queries
 
 ### Phase 2: Relationships (Required)
 
@@ -290,26 +273,25 @@ Graceful handling of constraint violations with specific error types.
 
 ### Phase 4: Migration Helpers (Recommended)
 
-9. **UUID field support** - Optional UUID primary key alongside title
+9. **Cascade title updates** - Update references when a model's title changes
 10. **Migration scripts** - SQLite → Markdown file conversion
 
 ### Phase 5: Advanced Features (Optional)
 
-11. **Polymorphic models** - Inheritance support
-12. **Cascade operations** - Relationship cleanup on delete
-13. **Compound filters** - AND/OR query support
+11. **Polymorphic models** - Inheritance support (low priority at current scale)
+12. **Compound filters** - AND/OR query support
 
 ---
 
 ## 6. Estimated Effort
 
-| Phase   | Features                        | Complexity |
-| ------- | ------------------------------- | ---------- |
-| Phase 1 | EnumSpec, ListSpec, Filtering   | Medium     |
-| Phase 2 | Many-to-many relationships      | High       |
-| Phase 3 | Unique constraints, Upsert      | Low-Medium |
-| Phase 4 | UUID support, Migration scripts | Medium     |
-| Phase 5 | Polymorphism, Cascades          | High       |
+| Phase   | Features                                  | Complexity |
+| ------- | ----------------------------------------- | ---------- |
+| Phase 1 | ~~EnumSpec~~, ~~ListSpec~~, ~~Filtering~~ | Medium     |
+| Phase 2 | Bidirectional many-to-many sync           | High       |
+| Phase 3 | Unique constraints, API cleanup           | Low-Medium |
+| Phase 4 | Cascade title updates, Migration scripts  | Medium     |
+| Phase 5 | Polymorphism, Compound filters            | High       |
 
 ---
 
@@ -340,7 +322,7 @@ Keep complex models in SQLAlchemy, migrate simple ones to mdorm.
 
 ## 8. Recommendations
 
-1. **Start with Phase 1** - EnumSpec and ListSpec are straightforward and unblock Recipe migration
+1. **Phase 1 progress** - EnumSpec and ListSpec are complete; filtering is the remaining Phase 1 item
 2. **Prototype many-to-many** - This is the most complex feature; prototype before committing
 3. **Consider API changes** - Using `name` as primary key (instead of UUID) simplifies mdorm usage
 4. **Write migration scripts early** - Test data conversion before building all features
