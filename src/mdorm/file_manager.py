@@ -8,7 +8,7 @@ from .model import MarkdownModel
 
 T = TypeVar("T", bound=MarkdownModel)
 
-SECTION_PATTERN = re.compile(r"<!-- section: (\w+) -->")
+SECTION_PATTERN = re.compile(r"(?:^## .+\n)?<!-- section: (\w+) -->", re.MULTILINE)
 
 
 class FileManager:
@@ -22,7 +22,7 @@ class FileManager:
     @staticmethod
     def _dump_content(obj: MarkdownModel) -> str:
         """Serialize content and body fields to markdown."""
-        sections = [obj.content]
+        sections = [obj.content] if obj.content else []
         for name, spec in obj.__class__.get_field_specs().items():
             if not spec.in_body:
                 continue

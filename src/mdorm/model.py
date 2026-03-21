@@ -9,7 +9,7 @@ class MarkdownModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     title: str
-    content: str
+    content: str = ""
     mtime: float = 0.0  # Initialized as stale to force a fetch
 
     # Registry for discovering inheritor classes on startup

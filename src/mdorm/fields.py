@@ -80,20 +80,24 @@ class StringSpec(FieldSpec):
         return db.String(self.max_length)
 
 
-class SectionMixin(FieldSpec):
+class SectionMixin:
+
+    def _format_heading(self, field_name: str) -> str:
+        return field_name.replace("_", " ").title()
+
+    def _serialize(self, value: str, field_name: str) -> str:
+        heading = self._format_heading(field_name)
+        return f"## {heading}\n<!-- section: {field_name} -->\n\n{value}"
+
+
+class SectionSpec(FieldSpec, SectionMixin):
+    """Text field stored as a section in the markdown body."""
 
     in_body = True
 
     @property
     def db_type(self) -> db.types.TypeEngine:
         return db.Text()
-
-    def _serialize(self, value: str, field_name: str) -> str:
-        return f"<!-- section: {field_name} -->\n\n{value}"
-
-
-class SectionSpec(SectionMixin):
-    """Text field stored as a section in the markdown body."""
 
     def serialize(self, value: str, field_name: str) -> str:
         return self._serialize(value, field_name)
@@ -113,8 +117,14 @@ class ListSpec(FieldSpec):
         return [item.strip() for item in value.split(",") if item]
 
 
-class ListSectionSpec(SectionMixin):
+class ListSectionSpec(FieldSpec, SectionMixin):
     """List of strings stored as bullet list in body section."""
+
+    in_body = True
+
+    @property
+    def db_type(self) -> db.types.TypeEngine:
+        return db.JSON()
 
     def serialize(self, value: list[str], field_name: str) -> str:
         content = "\n".join(f"- {item}" for item in value)
