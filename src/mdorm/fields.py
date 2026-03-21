@@ -52,7 +52,7 @@ class EnumSpec(FieldSpec):
 
     @property
     def db_type(self) -> TypeEngine:
-        return db.String(255)
+        return db.Enum(self.EnumType)
 
     def serialize(self, value: Enum, field_name: str) -> str:
         return value.value
@@ -99,6 +99,32 @@ class SectionSpec(SectionMixin):
         return self._serialize(value, field_name)
 
 
+class ListSpec(FieldSpec):
+    """List of strings stored as comma-separated string in frontmatter."""
+
+    @property
+    def db_type(self) -> db.types.TypeEngine:
+        return db.JSON()
+
+    def serialize(self, value: list[str], field_name: str) -> str:
+        return ", ".join(value)
+
+    def deserialize(self, value: str, field_name: str) -> list[str]:
+        return [item.strip() for item in value.split(",") if item]
+
+
+class ListSectionSpec(SectionMixin):
+    """List of strings stored as bullet list in body section."""
+
+    def serialize(self, value: list[str], field_name: str) -> str:
+        content = "\n".join(f"- {item}" for item in value)
+        return self._serialize(content, field_name)
+
+    def deserialize(self, value: str, field_name: str) -> list[str]:
+        lines = value.strip().split("\n") if value else []
+        return [line.lstrip("- ").strip() for line in lines if line.strip()]
+
+
 class RelationMixin:
 
     WIKI_LINK_PATTERN = re.compile(r"\[\[([^/\]]+)/([^\]]+)\]\]")
@@ -118,10 +144,10 @@ class RelationMixin:
         return found_title
 
 
-class RelationToOne(FieldSpec, RelationMixin):
+class RelationToOneSpec(FieldSpec, RelationMixin):
     """
     Single relation stored as wiki-link in frontmatter.
-    usage example: Annotated[str, RelationToOne("Author")]
+    usage example: Annotated[str, RelationToOneSpec("Author")]
     """
 
     @property
@@ -139,15 +165,14 @@ class RelationToOne(FieldSpec, RelationMixin):
         return self._parse_match(match)
 
 
-class RelationToMany(SectionMixin, RelationMixin):
+class RelationToManySpec(ListSectionSpec, RelationMixin):
     """Multiple relations stored as wiki-link list in body section.
-    usage example: Annotated[str, RelationToMany("Author")]
+    usage example: Annotated[str, RelationToManySpec("Author")]
     """
 
     def serialize(self, value: list[str], field_name: str) -> str:
-        links = [f"- {self._create_link(title)}" for title in value]
-        content = "\n".join(links)
-        return self._serialize(content, field_name)
+        links = [self._create_link(title) for title in value]
+        return super().serialize(links, field_name)
 
     def deserialize(self, value: str, field_name: str) -> list[str]:
         return [

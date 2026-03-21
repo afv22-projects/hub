@@ -58,7 +58,7 @@ DBBase (Abstract base with UUID primary key)
 | ---------------------- | ------------------------------------------ | -------------------- | -------------- |
 | Many-to-Many           | Recipe ↔ Ingredient                        | Not supported        | **Needs work** |
 | Association tables     | `recipe_ingredient_assoc`                  | Not supported        | **Needs work** |
-| Back-references        | `ingredient.recipes`, `recipe.ingredients` | `RelationToOne` only | **Needs work** |
+| Back-references        | `ingredient.recipes`, `recipe.ingredients` | `RelationToOneSpec` only | **Needs work** |
 | Relationship traversal | `db_ingredient.recipes`                    | Not supported        | **Needs work** |
 
 ### 2.3 Query Features
@@ -98,7 +98,7 @@ DBBase (Abstract base with UUID primary key)
 
 #### 1. Many-to-Many Relationships
 
-**AFV:** MDorm already has a one-to-many called RelationToMany. Is the only difference between that and a many-to-many field type the back-population?
+**AFV:** MDorm already has a one-to-many called RelationToManySpec. Is the only difference between that and a many-to-many field type the back-population?
 
 **Current pantry usage:**
 
@@ -118,9 +118,9 @@ class DBRecipe:
     ingredients: Mapped[list["DBIngredient"]] = relationship(back_populates="recipes")
 ```
 
-**mdorm gap:** Only has `RelationToOne` for single references. Needs:
+**mdorm gap:** Only has `RelationToOneSpec` for single references. Needs:
 
-- `RelationToMany` with bidirectional sync
+- `RelationToManySpec` with bidirectional sync
 - Storage format for many-to-many (inline list or separate association files)
 - Automatic back-reference population
 
@@ -263,7 +263,7 @@ Graceful handling of constraint violations with specific error types.
 | Integer fields       | `IntegerSpec()`                                      |
 | String fields        | `StringSpec(max_length=...)`                         |
 | Section fields       | `SectionSpec()` for body content                     |
-| Single relations     | `RelationToOne("ModelName")`                         |
+| Single relations     | `RelationToOneSpec("ModelName")`                         |
 | Model registration   | Auto-registration via metaclass                      |
 | Lazy loading         | `MDorm(path, lazy_load=True)`                        |
 
@@ -279,7 +279,7 @@ Graceful handling of constraint violations with specific error types.
 
 ### Phase 2: Relationships (Required)
 
-4. **RelationToMany improvements** - Bidirectional many-to-many
+4. **RelationToManySpec improvements** - Bidirectional many-to-many
 5. **Back-reference population** - Auto-populate reverse relations
 6. **Association storage** - Decide on storage format
 
@@ -398,7 +398,7 @@ class DBRecipe(DBBase):
 ```python
 from typing import Annotated
 from src.mdorm import MarkdownModel
-from src.mdorm.fields import BooleanSpec, EnumSpec, ListSpec, SectionSpec, RelationToMany
+from src.mdorm.fields import BooleanSpec, EnumSpec, ListSpec, SectionSpec, RelationToManySpec
 
 class Consumable(MarkdownModel):
     # title = name (used as filename/PK)
@@ -409,13 +409,13 @@ class Consumable(MarkdownModel):
 class Ingredient(MarkdownModel):
     needed: Annotated[bool, BooleanSpec()] = False
     category: Annotated[IngredientCategory, EnumSpec(IngredientCategory)]
-    recipes: Annotated[list[str], RelationToMany("Recipe")] = []
+    recipes: Annotated[list[str], RelationToManySpec("Recipe")] = []
     content: str = ""
 
 class Recipe(MarkdownModel):
     notes: Annotated[str, SectionSpec()] = ""
     sources: Annotated[list[str], ListSpec()] = []
     tags: Annotated[list[str], ListSpec()] = []
-    ingredients: Annotated[list[str], RelationToMany("Ingredient")] = []
+    ingredients: Annotated[list[str], RelationToManySpec("Ingredient")] = []
     content: str = ""  # main recipe content/instructions
 ```

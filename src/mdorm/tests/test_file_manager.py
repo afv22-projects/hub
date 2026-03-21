@@ -5,7 +5,7 @@ from typing import Annotated
 import pytest
 
 from mdorm import MarkdownModel
-from mdorm.fields import BooleanSpec, RelationToOne, SectionSpec
+from mdorm.fields import BooleanSpec, RelationToOneSpec, SectionSpec
 from mdorm.file_manager import FileManager
 
 
@@ -24,7 +24,7 @@ class Author(MarkdownModel):
 
 
 class Recipe(MarkdownModel):
-    author: Annotated[str, RelationToOne("Author")]
+    author: Annotated[str, RelationToOneSpec("Author")]
 
 
 class TestParseContent:
@@ -433,8 +433,8 @@ draft: false
                 fm.delete(Article, "missing")
 
 
-class TestRelationToOne:
-    """Tests for RelationToOne field parsing and serialization."""
+class TestRelationToOneSpec:
+    """Tests for RelationToOneSpec field parsing and serialization."""
 
     def test_read_parses_wiki_link(self):
         """Verify read() parses wiki link syntax and extracts the title."""
