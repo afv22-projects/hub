@@ -11,9 +11,9 @@ from mdorm.fields import (
 
 class Recipe(MarkdownModel):
     # Frontmatter
-    labels: Annotated[list[str], ListSpec()] = []
+    labels: Annotated[list[str], ListSpec()]
 
     # Body Sections
-    ingredients: Annotated[list[str], RelationToManySpec("Ingredient")] = []
-    notes: Annotated[str, SectionSpec()] = ""
-    sources: Annotated[list[str], ListSectionSpec()] = []
+    ingredients: Annotated[list[str], RelationToManySpec("Ingredient")]
+    notes: Annotated[str, SectionSpec()]
+    sources: Annotated[list[str], ListSectionSpec()]

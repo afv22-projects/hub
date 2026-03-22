@@ -6,4 +6,5 @@ from mdorm.fields import EnumSpec
 
 
 class Ingredient(MarkdownModel):
+    # Frontmatter
     category: Annotated[IngredientCategory, EnumSpec(IngredientCategory)]

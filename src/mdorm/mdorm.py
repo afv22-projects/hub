@@ -76,14 +76,14 @@ class MDorm:
         return result
 
     def create(self, obj: MarkdownModel) -> None:
-        if self.files.exists(obj):
+        if self.files.exists(obj.__class__, obj.title):
             raise FileExistsError()
         mtime = self.files.write(obj)
         obj.mtime = mtime
         self.cache.create(obj)
 
     def update(self, obj: MarkdownModel) -> None:
-        if not self.files.exists(obj):
+        if not self.files.exists(obj.__class__, obj.title):
             raise FileNotFoundError()
         mtime = self.files.write(obj)
         obj.mtime = mtime

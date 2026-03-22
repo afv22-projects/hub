@@ -62,7 +62,7 @@ class Cache:
                 .values(**obj.model_dump())
             )
             if result.rowcount == 0:
-                raise KeyError()
+                raise FileNotFoundError()
 
     def upsert(self, obj: MarkdownModel) -> None:
         with self._connect(obj.__class__) as (conn, table):
@@ -78,4 +78,4 @@ class Cache:
         with self._connect(Model) as (conn, table):
             result = conn.execute(table.delete().where(table.c.title == title))
             if result.rowcount == 0:
-                raise KeyError()
+                raise FileNotFoundError()

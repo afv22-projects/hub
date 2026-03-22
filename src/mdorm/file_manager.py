@@ -67,8 +67,8 @@ class FileManager:
             mtime=file.stat().st_mtime,
         )
 
-    def exists(self, obj: MarkdownModel) -> bool:
-        file = self.models_dir / obj.__class__.__name__ / (obj.title + ".md")
+    def exists(self, Model: type[T], title: str) -> bool:
+        file = self.models_dir / Model.__name__ / (title + ".md")
         return file.exists()
 
     def get_mtime(self, Model: type[T], title: str) -> float | None:
