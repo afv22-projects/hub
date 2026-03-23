@@ -29,9 +29,8 @@ class DBBase(DeclarativeBase):
     )
 
 
-def init_db():
+def init_db(db_uri: str):
     global engine, SessionLocal
-    db_uri = os.environ.get("DB_URI", "sqlite:///.data/app.db")
     engine = create_engine(db_uri, connect_args={"check_same_thread": False})
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     configure_mappers()

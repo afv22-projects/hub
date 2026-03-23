@@ -5,15 +5,16 @@ from mdorm import MDorm
 mdorm: MDorm | None = None
 
 
-def init_db() -> None:
+def init_db(
+    models_dir: Path = Path("data/pantry"),
+    db_url: str = "sqlite:///data/pantry.db",
+) -> None:
     global mdorm
+
     if not mdorm:
         from .models import Consumable, Ingredient, Recipe
 
-        mdorm = MDorm(
-            models_dir=Path("data/pantry"),
-            db_url="sqlite:///data/appv2.db",
-        )
+        mdorm = MDorm(models_dir, db_url)
 
 
 def get_db() -> MDorm:
