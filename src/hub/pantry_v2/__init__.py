@@ -5,10 +5,7 @@ from mdorm import MDorm
 mdorm: MDorm | None = None
 
 
-def init_db(
-    models_dir: Path = Path("data/pantry"),
-    db_url: str = "sqlite:///data/pantry.db",
-) -> None:
+def init_db(models_dir: Path, db_url: str) -> None:
     global mdorm
 
     if not mdorm:

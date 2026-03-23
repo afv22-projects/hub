@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import time
 
 from dotenv import load_dotenv
@@ -18,10 +19,12 @@ from hub.pantry_v2 import init_db as init_mdorm
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
 DB_URI = os.environ.get("DB_URI", "sqlite:///data/app.db")
+PANTRY_MODELS_DIR = os.environ.get("PANTRY_MODELS_DIR", "data/pantry")
+PANTRY_DB_URI = os.environ.get("PANTRY_DB_URI", "sqlite:///data/pantry.db")
 
 init_logging(LOG_LEVEL)
 init_db(DB_URI)
-init_mdorm()
+init_mdorm(Path(PANTRY_MODELS_DIR), PANTRY_DB_URI)
 
 app = FastAPI(title="Hub")
 
