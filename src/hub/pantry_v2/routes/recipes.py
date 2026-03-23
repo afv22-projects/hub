@@ -17,7 +17,7 @@ def add_ingredient_to_recipe(name: str, ing_name: str, db: MDorm = Depends(get_d
 
     ingredient = db.get_or_none(Ingredient, ing_name)
     if not ingredient:
-        ingredient = Ingredient(title=ing_name, category=IngredientCategory.OTHER)
+        ingredient = Ingredient(title=ing_name)
         db.create(ingredient)
 
     if ing_name not in recipe.ingredients:
@@ -64,7 +64,7 @@ def remove_source_from_recipe(name: str, source: str, db: MDorm = Depends(get_db
         db.update(recipe)
 
 
-@router.post("/{name}/tags", status_code=status.HTTP_200_OK)
+@router.post("/{name}/labels", status_code=status.HTTP_200_OK)
 def add_label_to_recipe(name: str, label: str, db: MDorm = Depends(get_db)):
     recipe = db.get_or_none(Recipe, name)
     if not recipe:
@@ -75,7 +75,7 @@ def add_label_to_recipe(name: str, label: str, db: MDorm = Depends(get_db)):
         db.update(recipe)
 
 
-@router.delete("/{name}/tags", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{name}/labels", status_code=status.HTTP_204_NO_CONTENT)
 def remove_label_from_recipe(name: str, label: str, db: MDorm = Depends(get_db)):
     recipe = db.get_or_none(Recipe, name)
     if not recipe:

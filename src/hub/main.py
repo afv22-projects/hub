@@ -13,12 +13,14 @@ from hub.db import init_db
 from hub.logging_config import init_logging, get_uvicorn_log_config, set_request_id
 from hub.routes import pantry_app, reflect_app
 from hub.pantry_v2.routes import app as pantry_v2_app
+from hub.pantry_v2 import init_db as init_mdorm
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
 
 init_logging(LOG_LEVEL)
 init_db()
+init_mdorm()
 
 app = FastAPI(title="Hub")
 
