@@ -5,11 +5,11 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
 
-from hub.reflect.db import DBBase
+from .base import DBBase
 from hub.reflect.enums import TrackingStatus
 
 if TYPE_CHECKING:
-    from hub.reflect.db import DBGoal
+    from .goal import DBGoal
 
 
 class DBWeeklyCheckIn(DBBase):

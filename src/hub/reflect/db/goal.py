@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import String, Integer, Enum as SQLEnum
 
-from hub.reflect.db import DBBase
-from hub.reflect.db.mixins import VersionedMixin
+from .base import DBBase
+from .mixins import VersionedMixin
 from hub.reflect.enums import GoalPriority, GoalStatus
 
 if TYPE_CHECKING:

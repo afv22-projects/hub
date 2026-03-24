@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import String, Integer
 
-from hub.reflect.db import DBBase
+from .base import DBBase
 
 
 class DBMonthlyReview(DBBase):
