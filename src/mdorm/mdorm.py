@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import TypeVar
 
@@ -14,9 +15,10 @@ class MDorm:
         models_dir: Path,
         db_url: str = "sqlite://",
         lazy_load: bool = False,
+        logger: logging.Logger | None = None,
     ):
         self.files = FileManager(models_dir)
-        self.cache = Cache(db_url)
+        self.cache = Cache(db_url, logger=logger)
 
         # Load existing objects into db
         if not lazy_load:

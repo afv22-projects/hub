@@ -1,3 +1,4 @@
+import logging
 from contextlib import contextmanager
 from typing import TypeVar
 
@@ -11,8 +12,14 @@ type Filter = db.ColumnElement[bool]
 
 
 class Cache:
-    def __init__(self, db_url: str = "sqlite://"):
-        self.engine = db.create_engine(db_url, echo=True)
+    def __init__(self, db_url: str = "sqlite://", logger: logging.Logger | None = None):
+        if logger:
+            sql_logger = logging.getLogger("sqlalchemy.engine")
+            sql_logger.setLevel(logger.level)
+            sql_logger.handlers = logger.handlers
+            sql_logger.propagate = False
+
+        self.engine = db.create_engine(db_url)
         self.metadata = db.MetaData()
 
         # Initialize tables

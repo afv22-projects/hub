@@ -24,7 +24,7 @@ def init_db(models_dir: Path, db_url: str) -> None:
         raise
 
     try:
-        mdorm = MDorm(models_dir, db_url)
+        mdorm = MDorm(models_dir, db_url, logger=logger)
         logger.info("pantry_v2 db initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize MDorm: {e}")
