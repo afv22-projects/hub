@@ -1,6 +1,6 @@
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, computed_field
 
 from .fields import FieldSpec, get_field_spec
 
@@ -11,6 +11,12 @@ class MarkdownModel(BaseModel):
     title: str
     content: str = ""
     mtime: float = 0.0  # Initialized as stale to force a fetch
+
+    @computed_field
+    @property
+    def model_type(self) -> str:
+        """Return the model class name for frontend type discrimination."""
+        return self.__class__.__name__
 
     # Registry for discovering inheritor classes on startup
     _registry: ClassVar[dict[str, type["MarkdownModel"]]] = {}

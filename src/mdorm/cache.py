@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from typing import TypeVar
 
 import sqlalchemy as db
+from sqlalchemy.pool import StaticPool
 
 from .model import MarkdownModel
 
@@ -19,7 +20,16 @@ class Cache:
             sql_logger.handlers = logger.handlers
             sql_logger.propagate = False
 
-        self.engine = db.create_engine(db_url)
+        # Use StaticPool for in-memory SQLite to keep the same connection alive
+        # across all operations, preventing data loss between requests
+        if db_url in ("sqlite://", "sqlite:///:memory:"):
+            self.engine = db.create_engine(
+                db_url,
+                connect_args={"check_same_thread": False},
+                poolclass=StaticPool,
+            )
+        else:
+            self.engine = db.create_engine(db_url)
         self.metadata = db.MetaData()
 
         # Initialize tables
@@ -59,27 +69,26 @@ class Cache:
 
     def create(self, obj: MarkdownModel) -> None:
         with self._connect(obj.__class__) as (conn, table):
-            conn.execute(table.insert().values(obj.model_dump()))
+            conn.execute(table.insert().values(obj.model_dump(exclude={"model_type"})))
 
     def update(self, obj: MarkdownModel) -> None:
         with self._connect(obj.__class__) as (conn, table):
             result = conn.execute(
                 table.update()
                 .where(table.c.title == obj.title)
-                .values(**obj.model_dump())
+                .values(**obj.model_dump(exclude={"model_type"}))
             )
             if result.rowcount == 0:
                 raise FileNotFoundError()
 
     def upsert(self, obj: MarkdownModel) -> None:
         with self._connect(obj.__class__) as (conn, table):
+            data = obj.model_dump(exclude={"model_type"})
             result = conn.execute(
-                table.update()
-                .where(table.c.title == obj.title)
-                .values(**obj.model_dump())
+                table.update().where(table.c.title == obj.title).values(**data)
             )
             if result.rowcount == 0:
-                conn.execute(table.insert().values(obj.model_dump()))
+                conn.execute(table.insert().values(data))
 
     def delete(self, Model: type[MarkdownModel], title: str) -> None:
         with self._connect(Model) as (conn, table):

@@ -20,7 +20,7 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
 DB_URI = os.environ.get("DB_URI", "sqlite:///data/app.db")
 PANTRY_MODELS_DIR = os.environ.get("PANTRY_MODELS_DIR", "data/pantry")
-PANTRY_DB_URI = os.environ.get("PANTRY_DB_URI", "sqlite:///data/pantry.db")
+PANTRY_DB_URI = os.environ.get("PANTRY_DB_URI", "sqlite:///:memory:")
 
 init_logging(LOG_LEVEL)
 init_db(DB_URI)
