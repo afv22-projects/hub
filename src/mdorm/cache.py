@@ -69,21 +69,21 @@ class Cache:
 
     def create(self, obj: MarkdownModel) -> None:
         with self._connect(obj.__class__) as (conn, table):
-            conn.execute(table.insert().values(obj.model_dump(exclude={"model_type"})))
+            conn.execute(table.insert().values(obj.model_dump()))
 
     def update(self, obj: MarkdownModel) -> None:
         with self._connect(obj.__class__) as (conn, table):
             result = conn.execute(
                 table.update()
                 .where(table.c.title == obj.title)
-                .values(**obj.model_dump(exclude={"model_type"}))
+                .values(**obj.model_dump())
             )
             if result.rowcount == 0:
                 raise FileNotFoundError()
 
     def upsert(self, obj: MarkdownModel) -> None:
         with self._connect(obj.__class__) as (conn, table):
-            data = obj.model_dump(exclude={"model_type"})
+            data = obj.model_dump()
             result = conn.execute(
                 table.update().where(table.c.title == obj.title).values(**data)
             )
