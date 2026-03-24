@@ -8,14 +8,6 @@ from alembic import context
 from src.hub.reflect.db import DBBase
 from src.hub.logging_config import init_logging, InterceptHandler
 
-# Import all models so alembic can detect them
-from src.hub.reflect.db import (  # noqa: F401
-    DBGoal,
-    DBGoalMonthOutcome,
-    DBMonthlyReview,
-    DBWeeklyCheckIn,
-)
-
 # Configure mappers to register version tables with metadata
 from sqlalchemy.orm import configure_mappers
 
