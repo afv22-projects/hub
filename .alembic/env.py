@@ -5,17 +5,11 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from src.hub.db import DBBase
+from src.hub.reflect.db import DBBase
 from src.hub.logging_config import init_logging, InterceptHandler
 
 # Import all models so alembic can detect them
-from src.hub.db.pantry import (  # noqa: F401
-    DBConsumable,
-    DBIngredient,
-    DBItem,
-    DBRecipe,
-)
-from src.hub.db.reflect import (  # noqa: F401
+from src.hub.reflect.db import (  # noqa: F401
     DBGoal,
     DBGoalMonthOutcome,
     DBMonthlyReview,

@@ -3,6 +3,7 @@
 from .base import DBBase
 from .goal import DBGoal
 from .goal_month_outcome import DBGoalMonthOutcome
+from .monthly_review import DBMonthlyReview
 from .weekly_check_in import DBWeeklyCheckIn
 from .session import init_db, get_db
 
@@ -10,6 +11,7 @@ __all__ = [
     "DBBase",
     "DBGoal",
     "DBGoalMonthOutcome",
+    "DBMonthlyReview",
     "DBWeeklyCheckIn",
     "init_db",
     "get_db",
