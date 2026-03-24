@@ -10,11 +10,15 @@ from loguru import logger
 
 load_dotenv()
 
-from hub.db import init_db
-from hub.logging_config import init_logging, get_uvicorn_log_config, set_request_id
-from hub.routes import pantry_app, reflect_app
-from hub.pantry_v2.routes import app as pantry_v2_app
-from hub.pantry_v2 import init_db as init_mdorm
+from hub.logging_config import (
+    init_logging,
+    get_uvicorn_log_config,
+    set_request_id,
+)
+from hub.reflect.db import init_db as init_reflect_db
+from hub.reflect.routes import app as reflect_app
+from hub.pantry import init_db as init_mdorm
+from hub.pantry.routes import app as pantry_app
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
@@ -23,7 +27,7 @@ PANTRY_MODELS_DIR = os.environ.get("PANTRY_MODELS_DIR", "data/pantry")
 PANTRY_DB_URI = os.environ.get("PANTRY_DB_URI", "sqlite:///:memory:")
 
 init_logging(LOG_LEVEL)
-init_db(DB_URI)
+init_reflect_db(DB_URI)
 init_mdorm(Path(PANTRY_MODELS_DIR), PANTRY_DB_URI)
 
 app = FastAPI(title="Hub")
@@ -78,9 +82,8 @@ def health_check():
     return {"status": "healthy"}
 
 
-app.mount("/pantry", pantry_app)
 app.mount("/reflect", reflect_app)
-app.mount("/pantry-v2", pantry_v2_app)
+app.mount("/pantry-v2", pantry_app)
 
 
 if __name__ == "__main__":
