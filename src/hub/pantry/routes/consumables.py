@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from mdorm import MDorm
+from mdorm import MDorm, Response
 from hub.pantry import get_db
 from hub.pantry.models import Consumable
 
 router = APIRouter(prefix="/consumables")
 
 
-@router.get("/{name}", response_model=Consumable)
+@router.get("/{name}", response_model=Response[Consumable])
 def get_consumable(name: str, db: MDorm = Depends(get_db)):
     consumable = db.get_or_none(Consumable, name)
     if not consumable:
@@ -31,7 +31,7 @@ def delete_consumable(name: str, db: MDorm = Depends(get_db)):
         raise HTTPException(404, f"Consumable not found (name: {name})")
 
 
-@router.get("", response_model=list[Consumable])
+@router.get("", response_model=list[Response[Consumable]])
 def get_consumables(db: MDorm = Depends(get_db)):
     return db.query(Consumable)
 

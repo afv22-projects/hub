@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from mdorm import MDorm
+from mdorm import MDorm, Response
 from hub.pantry import get_db
 from hub.pantry.models import Ingredient
 
 router = APIRouter(prefix="/ingredients")
 
 
-@router.get("/{name}", response_model=Ingredient)
+@router.get("/{name}", response_model=Response[Ingredient])
 def get_ingredient(name: str, db: MDorm = Depends(get_db)):
     ingredient = db.get_or_none(Ingredient, name)
     if not ingredient:
@@ -31,7 +31,7 @@ def delete_ingredient(name: str, db: MDorm = Depends(get_db)):
         raise HTTPException(404, f"Ingredient not found (name: {name})")
 
 
-@router.get("", response_model=list[Ingredient])
+@router.get("", response_model=list[Response[Ingredient]])
 def get_ingredients(db: MDorm = Depends(get_db)):
     return db.query(Ingredient)
 

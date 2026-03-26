@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from mdorm import MDorm
+from mdorm import MDorm, Response
 from hub.pantry import get_db
 from hub.pantry.enums import IngredientCategory
 from hub.pantry.models import Recipe, Ingredient
@@ -86,7 +86,7 @@ def remove_label_from_recipe(name: str, label: str, db: MDorm = Depends(get_db))
         db.update(recipe)
 
 
-@router.get("/{name}", response_model=Recipe)
+@router.get("/{name}", response_model=Response[Recipe])
 def get_recipe(name: str, db: MDorm = Depends(get_db)):
     recipe = db.get_or_none(Recipe, name)
     if not recipe:
@@ -110,7 +110,7 @@ def delete_recipe(name: str, db: MDorm = Depends(get_db)):
         raise HTTPException(404, f"Recipe not found (name: {name})")
 
 
-@router.get("", response_model=list[Recipe])
+@router.get("", response_model=list[Response[Recipe]])
 def get_recipes(db: MDorm = Depends(get_db)):
     return db.query(Recipe)
 
