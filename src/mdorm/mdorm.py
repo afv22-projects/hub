@@ -4,7 +4,7 @@ from typing import TypeVar
 
 from .cache import Cache, Filter
 from .file_manager import FileManager
-from .model import MarkdownModel, Request
+from .models import MarkdownModel, RequestBase
 
 T = TypeVar("T", bound=MarkdownModel)
 
@@ -77,28 +77,28 @@ class MDorm:
 
         return result
 
-    def create(self, Model: type[T], obj: "Request[T] | T") -> T:
+    def create(self, Model: type[T], obj: RequestBase | T) -> T:
         if self.files.exists(Model, obj.title):
             raise FileExistsError()
-        if isinstance(obj, Request):
+        if isinstance(obj, RequestBase):
             obj = Model(**obj.model_dump())
         mtime = self.files.write(obj)
         obj.mtime = mtime
         self.cache.create(obj)
         return obj
 
-    def update(self, Model: type[T], obj: "Request[T] | T") -> T:
+    def update(self, Model: type[T], obj: RequestBase | T) -> T:
         if not self.files.exists(Model, obj.title):
             raise FileNotFoundError()
-        if isinstance(obj, Request):
+        if isinstance(obj, RequestBase):
             obj = Model(**obj.model_dump())
         mtime = self.files.write(obj)
         obj.mtime = mtime
         self.cache.update(obj)
         return obj
 
-    def upsert(self, Model: type[T], obj: "Request[T] | T") -> None:
-        if isinstance(obj, Request):
+    def upsert(self, Model: type[T], obj: RequestBase | T) -> None:
+        if isinstance(obj, RequestBase):
             obj = Model(**obj.model_dump())
         mtime = self.files.write(obj)
         obj.mtime = mtime

@@ -5,7 +5,7 @@ from typing import TypeVar
 import sqlalchemy as db
 from sqlalchemy.pool import StaticPool
 
-from .model import MarkdownModel
+from .models import MarkdownModel
 
 
 T = TypeVar("T", bound=MarkdownModel)

@@ -4,7 +4,7 @@ from typing import Generator, TypeVar
 
 import frontmatter
 
-from .model import MarkdownModel
+from .models import MarkdownModel
 
 T = TypeVar("T", bound=MarkdownModel)
 

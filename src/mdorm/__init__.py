@@ -1,5 +1,5 @@
 from .mdorm import MDorm
-from .model import MarkdownModel, Patch, Request, Response
+from .models import MarkdownModel, Patch, Request, Response
 
 __all__ = [
     "MDorm",

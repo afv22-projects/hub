@@ -95,7 +95,7 @@ def get_recipe(name: str, db: MDorm = Depends(get_db)):
 
 
 @router.put("/{name}", status_code=status.HTTP_200_OK)
-def update_recipe(name: str, recipe: Recipe, db: MDorm = Depends(get_db)):
+def update_recipe(name: str, recipe: Request[Recipe], db: MDorm = Depends(get_db)):
     try:
         db.update(Recipe, recipe)
     except FileNotFoundError:
