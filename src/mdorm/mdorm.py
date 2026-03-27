@@ -77,7 +77,7 @@ class MDorm:
 
         return result
 
-    def create(self, Model: type[T], obj: Request | T) -> T:
+    def create(self, Model: type[T], obj: "Request[T] | T") -> T:
         if self.files.exists(Model, obj.title):
             raise FileExistsError()
         if isinstance(obj, Request):
@@ -87,7 +87,7 @@ class MDorm:
         self.cache.create(obj)
         return obj
 
-    def update(self, Model: type[T], obj: Request | T) -> T:
+    def update(self, Model: type[T], obj: "Request[T] | T") -> T:
         if not self.files.exists(Model, obj.title):
             raise FileNotFoundError()
         if isinstance(obj, Request):
@@ -97,7 +97,7 @@ class MDorm:
         self.cache.update(obj)
         return obj
 
-    def upsert(self, Model: type[T], obj: Request | T) -> None:
+    def upsert(self, Model: type[T], obj: "Request[T] | T") -> None:
         if isinstance(obj, Request):
             obj = Model(**obj.model_dump())
         mtime = self.files.write(obj)
