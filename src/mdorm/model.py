@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, ClassVar, TypeVar
+from typing import TYPE_CHECKING, ClassVar, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict, create_model
 
@@ -60,11 +60,17 @@ T = TypeVar("T", bound=MarkdownModel)
 
 if TYPE_CHECKING:
 
-    class Patch(BaseModel): ...
+    class Patch(BaseModel):
+        title: str
+        content: str = ""
 
-    class Response(BaseModel): ...
+    class Response(BaseModel):
+        title: str
+        content: str = ""
 
-    class Request(BaseModel): ...
+    class Request(BaseModel):
+        title: str
+        content: str = ""
 
 else:
 
@@ -122,5 +128,6 @@ else:
                 fields[f_name] = (f_info.annotation, f_info.default)
 
             request_model = create_model(f"{name}Request", **fields)
+            request_model._source_model = model_cls
             cls._registry[name] = request_model
             return request_model

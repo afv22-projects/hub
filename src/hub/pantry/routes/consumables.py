@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from mdorm import MDorm, Response
+from mdorm import MDorm, Request, Response
 from hub.pantry import get_db
 from hub.pantry.models import Consumable
 
@@ -16,9 +16,11 @@ def get_consumable(name: str, db: MDorm = Depends(get_db)):
 
 
 @router.put("/{name}", status_code=status.HTTP_200_OK)
-def update_consumable(name: str, consumable: Consumable, db: MDorm = Depends(get_db)):
+def update_consumable(
+    name: str, consumable: Request[Consumable], db: MDorm = Depends(get_db)
+):
     try:
-        db.update(consumable)
+        db.update(Consumable, consumable)
     except FileNotFoundError:
         raise HTTPException(404, f"Consumable not found (name: {name})")
 
@@ -37,10 +39,8 @@ def get_consumables(db: MDorm = Depends(get_db)):
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_consumable(consumable: Consumable, db: MDorm = Depends(get_db)):
+def create_consumable(req: Request[Consumable], db: MDorm = Depends(get_db)):
     try:
-        db.create(consumable)
+        db.create(Consumable, req)
     except FileExistsError:
-        raise HTTPException(
-            409, f"Consumable already exists (name: {consumable.title})"
-        )
+        raise HTTPException(409, f"Consumable already exists (name: {req.title})")

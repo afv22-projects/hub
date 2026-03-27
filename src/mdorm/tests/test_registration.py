@@ -65,7 +65,7 @@ class TestRegistration:
                 mtime=0.0,
                 count=42,
             )
-            db.create(obj)
+            db.create(SampleModel, obj)
 
             result = db.get_or_none(SampleModel, "test")
             assert result is not None

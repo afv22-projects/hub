@@ -26,7 +26,7 @@ class TestCreate:
             db = MDorm(Path(tmpdir))
 
             note = Note(title="note1", content="Hello", tags="a,b")
-            db.create(note)
+            db.create(Note, note)
 
             result = db.get(Note, "note1")
             assert result.title == "note1"
@@ -39,10 +39,10 @@ class TestCreate:
             db = MDorm(Path(tmpdir))
 
             note = Note(title="note1", content="", tags="")
-            db.create(note)
+            db.create(Note, note)
 
             with pytest.raises(Exception):
-                db.create(note)
+                db.create(Note, note)
 
 
 class TestUpdate:
@@ -52,10 +52,10 @@ class TestUpdate:
             db = MDorm(Path(tmpdir))
 
             note = Note(title="note1", content="Old", tags="")
-            db.create(note)
+            db.create(Note, note)
 
             updated = Note(title="note1", content="New", tags="updated")
-            db.update(updated)
+            db.update(Note, updated)
 
             result = db.get(Note, "note1")
             assert result.content == "New"
@@ -68,7 +68,7 @@ class TestUpdate:
 
             note = Note(title="missing", content="", tags="")
             with pytest.raises(FileNotFoundError):
-                db.update(note)
+                db.update(Note, note)
 
 
 class TestDelete:
@@ -78,7 +78,7 @@ class TestDelete:
             db = MDorm(Path(tmpdir))
 
             note = Note(title="note1", content="", tags="")
-            db.create(note)
+            db.create(Note, note)
 
             db.delete(Note, "note1")
 
@@ -108,7 +108,7 @@ class TestMarkdownFileSync:
                 content="Hello world",
                 tags="foo,bar",
             )
-            db.create(note)
+            db.create(Note, note)
 
             md_file = tmppath / "Note" / "note1.md"
             assert md_file.exists()
@@ -128,14 +128,14 @@ class TestMarkdownFileSync:
                 content="Old content",
                 tags="old",
             )
-            db.create(note)
+            db.create(Note, note)
 
             updated = Note(
                 title="note1",
                 content="New content",
                 tags="new",
             )
-            db.update(updated)
+            db.update(Note, updated)
 
             md_file = tmppath / "Note" / "note1.md"
             content = md_file.read_text()
@@ -150,7 +150,7 @@ class TestMarkdownFileSync:
             db = MDorm(tmppath)
 
             note = Note(title="note1", content="To be deleted", tags="")
-            db.create(note)
+            db.create(Note, note)
 
             md_file = tmppath / "Note" / "note1.md"
             assert md_file.exists()
@@ -169,7 +169,7 @@ class TestMarkdownFileSync:
                 content="Persist me",
                 tags="keep",
             )
-            db.create(note)
+            db.create(Note, note)
 
             # Create a new db instance pointing to same directory
             db2 = MDorm(tmppath)
@@ -195,7 +195,7 @@ class TestSectionsIntegration:
                 summary="A brief summary.",
                 tags="test",
             )
-            db.create(note)
+            db.create(NoteWithSections, note)
 
             # Verify in database
             result = db.get(NoteWithSections, "note1")
@@ -223,7 +223,7 @@ class TestSectionsIntegration:
                 notes="Old notes.",
                 tags="",
             )
-            db.create(note)
+            db.create(NoteWithSections, note)
 
             updated = NoteWithSections(
                 title="note1",
@@ -232,7 +232,7 @@ class TestSectionsIntegration:
                 summary="Added summary.",
                 tags="",
             )
-            db.update(updated)
+            db.update(NoteWithSections, updated)
 
             result = db.get(NoteWithSections, "note1")
             assert result.notes == "New notes."
@@ -250,7 +250,7 @@ class TestSectionsIntegration:
                 notes="## Header\nPersistent notes.",
                 tags="",
             )
-            db.create(note)
+            db.create(NoteWithSections, note)
 
             # Create fresh db instance
             db2 = MDorm(tmppath)
@@ -269,7 +269,7 @@ class TestSectionsIntegration:
                 notes="## First Header\nSome text.\n\n### Sub-header\nMore text.",
                 tags="",
             )
-            db.create(note)
+            db.create(NoteWithSections, note)
 
             result = db.get(NoteWithSections, "note1")
             assert "## First Header" in result.notes
@@ -286,7 +286,7 @@ class TestSectionsIntegration:
                 tags="",
                 # notes and summary use default ""
             )
-            db.create(note)
+            db.create(NoteWithSections, note)
 
             result = db.get(NoteWithSections, "note1")
             assert result.content == "Just body content"
@@ -299,20 +299,22 @@ class TestSectionsIntegration:
             db = MDorm(Path(tmpdir))
 
             db.create(
+                NoteWithSections,
                 NoteWithSections(
                     title="note1",
                     content="Body 1",
                     notes="Notes 1",
                     tags="",
-                )
+                ),
             )
             db.create(
+                NoteWithSections,
                 NoteWithSections(
                     title="note2",
                     content="Body 2",
                     summary="Summary 2",
                     tags="",
-                )
+                ),
             )
 
             results = db.query(NoteWithSections)
@@ -337,7 +339,7 @@ class TestSectionsIntegration:
                 summary="My summary",
                 tags="tag1",
             )
-            db.create(note)
+            db.create(NoteWithSections, note)
 
             # Read raw file and verify frontmatter
             md_file = tmppath / "NoteWithSections" / "note1.md"
@@ -358,9 +360,9 @@ class TestQueryFilter:
         with tempfile.TemporaryDirectory() as tmpdir:
             db_orm = MDorm(Path(tmpdir))
 
-            db_orm.create(Note(title="note1", content="Content 1", tags="python"))
-            db_orm.create(Note(title="note2", content="Content 2", tags="rust"))
-            db_orm.create(Note(title="note3", content="Content 3", tags="python"))
+            db_orm.create(Note, Note(title="note1", content="Content 1", tags="python"))
+            db_orm.create(Note, Note(title="note2", content="Content 2", tags="rust"))
+            db_orm.create(Note, Note(title="note3", content="Content 3", tags="python"))
 
             table = db_orm.cache.metadata.tables["Note"]
             results = db_orm.query(Note, filter=table.c.tags == "python")
@@ -374,9 +376,9 @@ class TestQueryFilter:
         with tempfile.TemporaryDirectory() as tmpdir:
             db_orm = MDorm(Path(tmpdir))
 
-            db_orm.create(Note(title="note1", content="Hello world", tags=""))
-            db_orm.create(Note(title="note2", content="Goodbye world", tags=""))
-            db_orm.create(Note(title="note3", content="Hello again", tags=""))
+            db_orm.create(Note, Note(title="note1", content="Hello world", tags=""))
+            db_orm.create(Note, Note(title="note2", content="Goodbye world", tags=""))
+            db_orm.create(Note, Note(title="note3", content="Hello again", tags=""))
 
             table = db_orm.cache.metadata.tables["Note"]
             results = db_orm.query(Note, filter=table.c.content.like("Hello%"))
@@ -390,10 +392,16 @@ class TestQueryFilter:
         with tempfile.TemporaryDirectory() as tmpdir:
             db_orm = MDorm(Path(tmpdir))
 
-            db_orm.create(Note(title="note1", content="Python guide", tags="python"))
-            db_orm.create(Note(title="note2", content="Rust guide", tags="rust"))
-            db_orm.create(Note(title="note3", content="Python tips", tags="python"))
-            db_orm.create(Note(title="note4", content="Python guide", tags="beginner"))
+            db_orm.create(
+                Note, Note(title="note1", content="Python guide", tags="python")
+            )
+            db_orm.create(Note, Note(title="note2", content="Rust guide", tags="rust"))
+            db_orm.create(
+                Note, Note(title="note3", content="Python tips", tags="python")
+            )
+            db_orm.create(
+                Note, Note(title="note4", content="Python guide", tags="beginner")
+            )
 
             table = db_orm.cache.metadata.tables["Note"]
             results = db_orm.query(
@@ -412,9 +420,9 @@ class TestQueryFilter:
         with tempfile.TemporaryDirectory() as tmpdir:
             db_orm = MDorm(Path(tmpdir))
 
-            db_orm.create(Note(title="note1", content="Content", tags="python"))
-            db_orm.create(Note(title="note2", content="Content", tags="rust"))
-            db_orm.create(Note(title="note3", content="Content", tags="go"))
+            db_orm.create(Note, Note(title="note1", content="Content", tags="python"))
+            db_orm.create(Note, Note(title="note2", content="Content", tags="rust"))
+            db_orm.create(Note, Note(title="note3", content="Content", tags="go"))
 
             table = db_orm.cache.metadata.tables["Note"]
             results = db_orm.query(
@@ -434,8 +442,8 @@ class TestQueryFilter:
         with tempfile.TemporaryDirectory() as tmpdir:
             db_orm = MDorm(Path(tmpdir))
 
-            db_orm.create(Note(title="note1", content="Content", tags="python"))
-            db_orm.create(Note(title="note2", content="Content", tags="rust"))
+            db_orm.create(Note, Note(title="note1", content="Content", tags="python"))
+            db_orm.create(Note, Note(title="note2", content="Content", tags="rust"))
 
             table = db_orm.cache.metadata.tables["Note"]
             results = db_orm.query(Note, filter=table.c.tags == "javascript")
@@ -448,20 +456,22 @@ class TestQueryFilter:
             db_orm = MDorm(Path(tmpdir))
 
             db_orm.create(
+                NoteWithSections,
                 NoteWithSections(
                     title="note1",
                     content="Body",
                     notes="Some notes",
                     tags="important",
-                )
+                ),
             )
             db_orm.create(
+                NoteWithSections,
                 NoteWithSections(
                     title="note2",
                     content="Body",
                     notes="Other notes",
                     tags="draft",
-                )
+                ),
             )
 
             table = db_orm.cache.metadata.tables["NoteWithSections"]
@@ -479,9 +489,9 @@ class TestQueryFilter:
         with tempfile.TemporaryDirectory() as tmpdir:
             db_orm = MDorm(Path(tmpdir))
 
-            db_orm.create(Note(title="note1", content="Content 1", tags="a"))
-            db_orm.create(Note(title="note2", content="Content 2", tags="b"))
-            db_orm.create(Note(title="note3", content="Content 3", tags="c"))
+            db_orm.create(Note, Note(title="note1", content="Content 1", tags="a"))
+            db_orm.create(Note, Note(title="note2", content="Content 2", tags="b"))
+            db_orm.create(Note, Note(title="note3", content="Content 3", tags="c"))
 
             results = db_orm.query(Note)
 

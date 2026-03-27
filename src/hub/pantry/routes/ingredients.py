@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from mdorm import MDorm, Response
+from mdorm import MDorm, Request, Response
 from hub.pantry import get_db
 from hub.pantry.models import Ingredient
 
@@ -16,9 +16,11 @@ def get_ingredient(name: str, db: MDorm = Depends(get_db)):
 
 
 @router.put("/{name}", status_code=status.HTTP_200_OK)
-def update_ingredient(name: str, ingredient: Ingredient, db: MDorm = Depends(get_db)):
+def update_ingredient(
+    name: str, ingredient: Request[Ingredient], db: MDorm = Depends(get_db)
+):
     try:
-        db.update(ingredient)
+        db.update(Ingredient, ingredient)
     except FileNotFoundError:
         raise HTTPException(404, f"Ingredient not found (name: {name})")
 
@@ -37,10 +39,8 @@ def get_ingredients(db: MDorm = Depends(get_db)):
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_ingredient(ingredient: Ingredient, db: MDorm = Depends(get_db)):
+def create_ingredient(req: Request[Ingredient], db: MDorm = Depends(get_db)):
     try:
-        db.create(ingredient)
+        db.create(Ingredient, req)
     except FileExistsError:
-        raise HTTPException(
-            409, f"Ingredient already exists (name: {ingredient.title})"
-        )
+        raise HTTPException(409, f"Ingredient already exists (name: {req.title})")

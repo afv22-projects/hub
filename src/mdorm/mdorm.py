@@ -4,7 +4,7 @@ from typing import TypeVar
 
 from .cache import Cache, Filter
 from .file_manager import FileManager
-from .model import MarkdownModel
+from .model import MarkdownModel, Request
 
 T = TypeVar("T", bound=MarkdownModel)
 
@@ -77,21 +77,29 @@ class MDorm:
 
         return result
 
-    def create(self, obj: MarkdownModel) -> None:
-        if self.files.exists(obj.__class__, obj.title):
+    def create(self, Model: type[T], obj: Request | T) -> T:
+        if self.files.exists(Model, obj.title):
             raise FileExistsError()
+        if isinstance(obj, Request):
+            obj = Model(**obj.model_dump())
         mtime = self.files.write(obj)
         obj.mtime = mtime
         self.cache.create(obj)
+        return obj
 
-    def update(self, obj: MarkdownModel) -> None:
-        if not self.files.exists(obj.__class__, obj.title):
+    def update(self, Model: type[T], obj: Request | T) -> T:
+        if not self.files.exists(Model, obj.title):
             raise FileNotFoundError()
+        if isinstance(obj, Request):
+            obj = Model(**obj.model_dump())
         mtime = self.files.write(obj)
         obj.mtime = mtime
         self.cache.update(obj)
+        return obj
 
-    def upsert(self, obj: MarkdownModel) -> None:
+    def upsert(self, Model: type[T], obj: Request | T) -> None:
+        if isinstance(obj, Request):
+            obj = Model(**obj.model_dump())
         mtime = self.files.write(obj)
         obj.mtime = mtime
         self.cache.upsert(obj)
