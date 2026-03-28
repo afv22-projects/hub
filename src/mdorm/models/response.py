@@ -1,6 +1,6 @@
 from typing import TypeVar, TYPE_CHECKING
 
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, computed_field, create_model
 
 from .markdown_model import MarkdownModel
 
@@ -10,7 +10,11 @@ T = TypeVar("T", bound=MarkdownModel)
 class ResponseBase(BaseModel):
     """Base class for all Response types."""
 
-    pass
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def _type(self) -> str:
+        """Return the name of the model class."""
+        return self.__class__.__name__.removesuffix("Response")
 
 
 if TYPE_CHECKING:
