@@ -77,6 +77,12 @@ class MDorm:
 
         return result
 
+    def query_by_relation(
+        self, Model: type[T], field: str, target_title: str
+    ) -> list[T]:
+        table = self.cache.metadata.tables[Model.__name__]
+        return self.query(Model, filter=getattr(table.c, field).contains(target_title))
+
     def create(self, Model: type[T], obj: RequestBase | T) -> T:
         if self.files.exists(Model, obj.title):
             raise FileExistsError()

@@ -10,7 +10,7 @@ T = TypeVar("T", bound=MarkdownModel)
 class ResponseBase(BaseModel):
     """Base class for all Response types."""
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def _type(self) -> str:
         """Return the name of the model class."""
