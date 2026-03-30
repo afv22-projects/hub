@@ -2,9 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from mdorm import MDorm, Request, Response
 from hub.pantry import get_db
-from hub.pantry.models import Ingredient
+from hub.pantry.models import Ingredient, Recipe
 
 router = APIRouter(prefix="/ingredients")
+
+
+@router.get("/{name}/recipes", response_model=list[str])
+def get_ingredient_recipes(name: str, db: MDorm = Depends(get_db)):
+    ingredient = db.get_or_none(Ingredient, name)
+    if not ingredient:
+        raise HTTPException(404, f"Ingredient not found (name: {name})")
+
+    recipes = db.query_by_relation(Recipe, "ingredients", name)
+    return [recipe.title for recipe in recipes]
 
 
 @router.get("/{name}", response_model=Response[Ingredient])
