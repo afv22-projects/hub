@@ -84,7 +84,6 @@ def health_check():
 
 app.mount("/reflect", reflect_app)
 app.mount("/pantry", pantry_app)
-app.mount("/pantry-v2", pantry_app)
 
 
 if __name__ == "__main__":
