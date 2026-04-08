@@ -6,10 +6,10 @@ from fastmcp.exceptions import ResourceError
 from hub.pantry import get_db
 from hub.pantry.models import Recipe
 
-mcp = FastMCP("recipes")
+mcp = FastMCP("Recipes")
 
 
-@mcp.resource("hub://recipes/{name}")
+@mcp.resource("pantry://{name}")
 def get_recipe(name: str) -> str:
     db = get_db()
     recipe = db.get_or_none(Recipe, name)
@@ -18,7 +18,7 @@ def get_recipe(name: str) -> str:
     return recipe.model_dump_json()
 
 
-@mcp.resource("hub://recipes")
+@mcp.resource("pantry://")
 def get_recipes() -> str:
     db = get_db()
     recipes = db.query(Recipe)

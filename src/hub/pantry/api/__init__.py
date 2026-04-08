@@ -3,11 +3,9 @@ from fastapi import FastAPI
 from .consumables import router as consumables_router
 from .ingredients import router as ingredients_router
 from .recipes import router as recipes_router
-from .mcp.recipes import mcp as recipes_mcp
+from .mcp import app as mcp_app
 
-mcp_app = recipes_mcp.http_app(path="/mcp")
-
-app = FastAPI(title="Pantry V2 API")
+app = FastAPI(title="Pantry API")
 
 app.include_router(consumables_router)
 app.include_router(ingredients_router)
