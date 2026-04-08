@@ -18,7 +18,7 @@ from hub.logging_config import (
 from hub.reflect.db import init_db as init_reflect_db
 from hub.reflect.routes import app as reflect_app
 from hub.pantry import init_db as init_mdorm
-from hub.pantry.routes import app as pantry_app
+from hub.pantry.api import app as pantry_app
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
