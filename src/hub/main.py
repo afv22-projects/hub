@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastmcp import FastMCP
 from loguru import logger
 
 load_dotenv()
@@ -20,7 +19,6 @@ from hub.reflect.db import init_db as init_reflect_db
 from hub.reflect.routes import app as reflect_app
 from hub.pantry import init_db as init_mdorm
 from hub.pantry.api import app as pantry_app
-from hub.pantry.mcp.recipes import mcp as pantry_mcp
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",")
@@ -86,10 +84,6 @@ def health_check():
 
 app.mount("/reflect", reflect_app)
 app.mount("/pantry", pantry_app)
-
-mcp = FastMCP(name="hub")
-
-mcp.mount(pantry_mcp, "pantry")
 
 
 if __name__ == "__main__":
