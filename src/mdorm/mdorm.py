@@ -25,7 +25,7 @@ class MDorm:
                 self._sync(Model)
 
     def _sync(self, Model: type[T]) -> None:
-        current_titles = set(file.stem for file in self.files.list_files(Model))
+        current_titles = set(title for title in self.files.list_titles(Model))
         cached_titles = set(obj.title for obj in self.cache.get_rows(Model))
 
         for title in current_titles - cached_titles:

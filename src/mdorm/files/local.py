@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 from typing import Generator, TypeVar
 
@@ -9,8 +8,6 @@ from .generic import GenericFiles
 
 T = TypeVar("T", bound=MarkdownModel)
 
-SECTION_PATTERN = re.compile(r"(?:^## .+\n)?<!-- section: (\w+) -->", re.MULTILINE)
-
 
 class LocalFiles(GenericFiles):
 
@@ -19,27 +16,6 @@ class LocalFiles(GenericFiles):
             models_dir.mkdir()
 
         self.models_dir = models_dir
-
-    @staticmethod
-    def _dump_content(obj: MarkdownModel) -> str:
-        """Serialize content and body fields to markdown."""
-        sections = [obj.content] if obj.content else []
-        for name, spec in obj.__class__.get_field_specs().items():
-            if not spec.in_body:
-                continue
-            value = getattr(obj, name)
-            sections.append(spec.serialize(value, name))
-        return "\n\n".join(sections)
-
-    @staticmethod
-    def _parse_content(content: str) -> dict[str, str]:
-        """Parse markdown body into content and raw section strings."""
-        parts = SECTION_PATTERN.split(content)
-        sections = {"content": parts[0].strip()}
-        it = iter(parts[1:])
-        for name, text in zip(it, it):
-            sections[name] = text.strip()
-        return sections
 
     def _load_file(self, Model: type[T], file: Path) -> T:
         """Load a model instance from a markdown file."""
@@ -84,12 +60,11 @@ class LocalFiles(GenericFiles):
             raise FileNotFoundError()
         return self._load_file(Model, file)
 
-    def list_files(self, Model: type[T]) -> Generator[Path]:
+    def list_titles(self, Model: type[T]) -> list[str]:
         model_dir = self.models_dir / Model.__name__
-        if model_dir.exists():
-            yield from model_dir.iterdir()
-        else:
-            yield from ()
+        if not model_dir.is_dir():
+            return []
+        return [path.stem for path in model_dir.iterdir()]
 
     def write(self, obj: MarkdownModel) -> float:
         model_dir = self.models_dir / obj.__class__.__name__
