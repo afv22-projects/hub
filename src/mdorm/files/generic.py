@@ -1,5 +1,6 @@
 import re
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from frontmatter import Post
 from typing import TypeVar
 
@@ -8,6 +9,12 @@ from mdorm.models.markdown_model import MarkdownModel
 T = TypeVar("T", bound=MarkdownModel)
 
 SECTION_PATTERN = re.compile(r"(?:^## .+\n)?<!-- section: (\w+) -->", re.MULTILINE)
+
+
+@dataclass
+class File:
+    title: str
+    mtime: float
 
 
 class GenericFiles(ABC):
@@ -71,7 +78,7 @@ class GenericFiles(ABC):
     def read(self, Model: type[T], title: str) -> T: ...
 
     @abstractmethod
-    def list_titles(self, Model: type[T]) -> list[str]: ...
+    def list_files(self, Model: type[T]) -> list[File]: ...
 
     @abstractmethod
     def write(self, obj: MarkdownModel) -> float: ...

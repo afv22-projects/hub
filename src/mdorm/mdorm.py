@@ -2,7 +2,7 @@ import logging
 from typing import TypeVar
 
 from .cache import Cache, Filter
-from .files.local import GenericFiles
+from .files import GenericFiles, File
 from .models import MarkdownModel, RequestBase
 
 T = TypeVar("T", bound=MarkdownModel)
@@ -24,8 +24,9 @@ class MDorm:
             for Model in MarkdownModel._registry.values():
                 self._sync(Model)
 
-    def _sync(self, Model: type[T]) -> None:
-        current_titles = set(title for title in self.files.list_titles(Model))
+    def _sync(self, Model: type[T]) -> list[File]:
+        current_files = self.files.list_files(Model)
+        current_titles = set(f.title for f in current_files)
         cached_titles = set(obj.title for obj in self.cache.get_rows(Model))
 
         for title in current_titles - cached_titles:
@@ -34,6 +35,8 @@ class MDorm:
 
         for title in cached_titles - current_titles:
             self.cache.delete(Model, title)
+
+        return current_files
 
     def get_or_none(self, Model: type[T], title: str) -> T | None:
         current_mtime = self.files.get_mtime(Model, title)
@@ -58,17 +61,12 @@ class MDorm:
         return obj
 
     def query(self, Model: type[T], filter: Filter | None = None) -> list[T]:
-        self._sync(Model)
+        current_files = {f.title: f.mtime for f in self._sync(Model)}
         cached_objs = self.cache.get_rows(Model, filter)
         result: list[T] = []
 
         for obj in cached_objs:
-            current_mtime = self.files.get_mtime(Model, obj.title)
-            if not current_mtime:
-                self.cache.delete(Model, obj.title)
-                continue
-
-            if obj.mtime < current_mtime:
+            if obj.mtime < current_files[obj.title]:
                 obj = self.files.read(Model, obj.title)
                 self.cache.upsert(obj)
 

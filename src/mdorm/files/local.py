@@ -4,7 +4,7 @@ from typing import TypeVar
 import frontmatter
 
 from ..models import MarkdownModel
-from .generic import GenericFiles
+from .generic import GenericFiles, File
 
 T = TypeVar("T", bound=MarkdownModel)
 
@@ -39,11 +39,15 @@ class LocalFiles(GenericFiles):
             file.stat().st_mtime,
         )
 
-    def list_titles(self, Model: type[T]) -> list[str]:
+    def list_files(self, Model: type[T]) -> list[File]:
         model_dir = self.models_dir / Model.__name__
         if not model_dir.is_dir():
             return []
-        return [path.stem for path in model_dir.iterdir()]
+
+        return [
+            File(title=path.stem, mtime=path.stat().st_mtime)
+            for path in model_dir.iterdir()
+        ]
 
     def write(self, obj: MarkdownModel) -> float:
         model_dir = self.models_dir / obj.__class__.__name__

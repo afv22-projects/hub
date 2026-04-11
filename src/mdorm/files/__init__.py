@@ -1,4 +1,5 @@
-from .generic import GenericFiles
+from .generic import GenericFiles, File
+from .dropbox import DropboxFiles
 from .local import LocalFiles
 
-__all__ = ["GenericFiles", "LocalFiles"]
+__all__ = ["File", "GenericFiles", "DropboxFiles", "LocalFiles"]
