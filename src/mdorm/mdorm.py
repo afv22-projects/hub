@@ -19,30 +19,27 @@ class MDorm:
         self.cache = Cache(db_url, logger=logger)
         self.sync()
 
-    def _sync_model(self, Model: type[T]) -> None:
-        current_files = self.files.list_files(Model)
-        current_titles = set(f.title for f in current_files)
-        cached_objs = {obj.title: obj for obj in self.cache.get_rows(Model)}
-
-        # Create new files
-        for title in current_titles - cached_objs.keys():
-            obj = self.files.read(Model, title)
-            self.cache.create(obj)
-
-        # Delete removed files
-        for title in cached_objs.keys() - current_titles:
-            self.cache.delete(Model, title)
-
-        # Update stale files
-        for f in current_files:
-            cached = cached_objs.get(f.title)
-            if cached and cached.mtime < f.mtime:
-                obj = self.files.read(Model, f.title)
-                self.cache.upsert(obj)
-
     def sync(self):
         for Model in MarkdownModel._registry.values():
-            self._sync_model(Model)
+            current_files = self.files.list_files(Model)
+            current_titles = set(f.title for f in current_files)
+            cached_objs = {obj.title: obj for obj in self.cache.get_rows(Model)}
+
+            # Create new files
+            for title in current_titles - cached_objs.keys():
+                obj = self.files.read(Model, title)
+                self.cache.create(obj)
+
+            # Delete removed files
+            for title in cached_objs.keys() - current_titles:
+                self.cache.delete(Model, title)
+
+            # Update stale files
+            for f in current_files:
+                cached = cached_objs.get(f.title)
+                if cached and cached.mtime < f.mtime:
+                    obj = self.files.read(Model, f.title)
+                    self.cache.upsert(obj)
 
     def get_or_none(self, Model: type[T], title: str) -> T | None:
         return self.cache.get_row(Model, title)
