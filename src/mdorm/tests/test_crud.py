@@ -5,7 +5,7 @@ from typing import Annotated
 import pytest
 import sqlalchemy as db
 
-from mdorm import MarkdownModel, MDorm
+from mdorm import LocalFiles, MarkdownModel, MDorm
 from mdorm.fields import SectionSpec, StringSpec
 
 
@@ -23,7 +23,8 @@ class TestCreate:
     def test_create_inserts_record(self):
         """Verify create() inserts a new record into the database."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             note = Note(title="note1", content="Hello", tags="a,b")
             db.create(Note, note)
@@ -36,7 +37,8 @@ class TestCreate:
     def test_create_duplicate_raises(self):
         """Verify create() raises an error for duplicate primary key."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             note = Note(title="note1", content="", tags="")
             db.create(Note, note)
@@ -49,7 +51,8 @@ class TestUpdate:
     def test_update_modifies_record(self):
         """Verify update() modifies an existing record."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             note = Note(title="note1", content="Old", tags="")
             db.create(Note, note)
@@ -64,7 +67,8 @@ class TestUpdate:
     def test_update_nonexistent_raises(self):
         """Verify update() raises an error if record doesn't exist."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             note = Note(title="missing", content="", tags="")
             with pytest.raises(FileNotFoundError):
@@ -75,7 +79,8 @@ class TestDelete:
     def test_delete_removes_record(self):
         """Verify delete() removes a record from the database."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             note = Note(title="note1", content="", tags="")
             db.create(Note, note)
@@ -88,7 +93,8 @@ class TestDelete:
     def test_delete_nonexistent_raises(self):
         """Verify delete() raises an error if record doesn't exist."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             with pytest.raises(FileNotFoundError):
                 db.delete(Note, "missing")
@@ -101,7 +107,8 @@ class TestMarkdownFileSync:
         """Verify create() writes a markdown file with frontmatter."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
-            db = MDorm(tmppath)
+            files = LocalFiles(tmppath)
+            db = MDorm(files)
 
             note = Note(
                 title="note1",
@@ -121,7 +128,8 @@ class TestMarkdownFileSync:
         """Verify update() modifies the markdown file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
-            db = MDorm(tmppath)
+            files = LocalFiles(tmppath)
+            db = MDorm(files)
 
             note = Note(
                 title="note1",
@@ -147,7 +155,8 @@ class TestMarkdownFileSync:
         """Verify delete() removes the markdown file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
-            db = MDorm(tmppath)
+            files = LocalFiles(tmppath)
+            db = MDorm(files)
 
             note = Note(title="note1", content="To be deleted", tags="")
             db.create(Note, note)
@@ -162,7 +171,8 @@ class TestMarkdownFileSync:
         """Verify that md files created are loaded back into a fresh db."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
-            db = MDorm(tmppath)
+            files = LocalFiles(tmppath)
+            db = MDorm(files)
 
             note = Note(
                 title="persist",
@@ -172,7 +182,8 @@ class TestMarkdownFileSync:
             db.create(Note, note)
 
             # Create a new db instance pointing to same directory
-            db2 = MDorm(tmppath)
+            files2 = LocalFiles(tmppath)
+            db2 = MDorm(files2)
             result = db2.get(Note, "persist")
 
             assert result.content == "Persist me"
@@ -186,7 +197,8 @@ class TestSectionsIntegration:
         """Verify create() stores section fields in both db and markdown file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
-            db = MDorm(tmppath)
+            files = LocalFiles(tmppath)
+            db = MDorm(files)
 
             note = NoteWithSections(
                 title="note1",
@@ -215,7 +227,8 @@ class TestSectionsIntegration:
         """Verify update() modifies section fields in both db and file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
-            db = MDorm(tmppath)
+            files = LocalFiles(tmppath)
+            db = MDorm(files)
 
             note = NoteWithSections(
                 title="note1",
@@ -242,7 +255,8 @@ class TestSectionsIntegration:
         """Verify section fields are loaded back from markdown files on db reload."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
-            db = MDorm(tmppath)
+            files = LocalFiles(tmppath)
+            db = MDorm(files)
 
             note = NoteWithSections(
                 title="persist",
@@ -253,7 +267,8 @@ class TestSectionsIntegration:
             db.create(NoteWithSections, note)
 
             # Create fresh db instance
-            db2 = MDorm(tmppath)
+            files2 = LocalFiles(tmppath)
+            db2 = MDorm(files2)
             result = db2.get(NoteWithSections, "persist")
 
             assert result.notes == "## Header\nPersistent notes."
@@ -261,7 +276,8 @@ class TestSectionsIntegration:
     def test_section_fields_with_markdown_content(self):
         """Verify section fields can contain full markdown with headers."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             note = NoteWithSections(
                 title="note1",
@@ -278,7 +294,8 @@ class TestSectionsIntegration:
     def test_empty_section_fields(self):
         """Verify model with empty section fields works correctly."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             note = NoteWithSections(
                 title="note1",
@@ -296,7 +313,8 @@ class TestSectionsIntegration:
     def test_all_returns_section_fields(self):
         """Verify all() returns models with their section fields."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             db.create(
                 NoteWithSections,
@@ -330,7 +348,8 @@ class TestSectionsIntegration:
         """Verify section fields are not written to YAML frontmatter."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
-            db = MDorm(tmppath)
+            files = LocalFiles(tmppath)
+            db = MDorm(files)
 
             note = NoteWithSections(
                 title="note1",
@@ -358,7 +377,8 @@ class TestQueryFilter:
     def test_query_filter_by_string_field(self):
         """Verify query() can filter by a string field equality."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db_orm = MDorm(Path(tmpdir))
+            files_orm = LocalFiles(Path(tmpdir))
+            db_orm = MDorm(files_orm)
 
             db_orm.create(Note, Note(title="note1", content="Content 1", tags="python"))
             db_orm.create(Note, Note(title="note2", content="Content 2", tags="rust"))
@@ -374,7 +394,8 @@ class TestQueryFilter:
     def test_query_filter_by_content(self):
         """Verify query() can filter by content field."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db_orm = MDorm(Path(tmpdir))
+            files_orm = LocalFiles(Path(tmpdir))
+            db_orm = MDorm(files_orm)
 
             db_orm.create(Note, Note(title="note1", content="Hello world", tags=""))
             db_orm.create(Note, Note(title="note2", content="Goodbye world", tags=""))
@@ -390,7 +411,8 @@ class TestQueryFilter:
     def test_query_filter_with_and_condition(self):
         """Verify query() supports AND conditions."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db_orm = MDorm(Path(tmpdir))
+            files_orm = LocalFiles(Path(tmpdir))
+            db_orm = MDorm(files_orm)
 
             db_orm.create(
                 Note, Note(title="note1", content="Python guide", tags="python")
@@ -418,7 +440,8 @@ class TestQueryFilter:
     def test_query_filter_with_or_condition(self):
         """Verify query() supports OR conditions."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db_orm = MDorm(Path(tmpdir))
+            files_orm = LocalFiles(Path(tmpdir))
+            db_orm = MDorm(files_orm)
 
             db_orm.create(Note, Note(title="note1", content="Content", tags="python"))
             db_orm.create(Note, Note(title="note2", content="Content", tags="rust"))
@@ -440,7 +463,8 @@ class TestQueryFilter:
     def test_query_filter_no_matches(self):
         """Verify query() returns empty list when filter matches nothing."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db_orm = MDorm(Path(tmpdir))
+            files_orm = LocalFiles(Path(tmpdir))
+            db_orm = MDorm(files_orm)
 
             db_orm.create(Note, Note(title="note1", content="Content", tags="python"))
             db_orm.create(Note, Note(title="note2", content="Content", tags="rust"))
@@ -453,7 +477,8 @@ class TestQueryFilter:
     def test_query_filter_with_section_model(self):
         """Verify query() filter works with models that have section fields."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db_orm = MDorm(Path(tmpdir))
+            files_orm = LocalFiles(Path(tmpdir))
+            db_orm = MDorm(files_orm)
 
             db_orm.create(
                 NoteWithSections,
@@ -487,7 +512,8 @@ class TestQueryFilter:
     def test_query_without_filter_returns_all(self):
         """Verify query() without filter returns all records."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db_orm = MDorm(Path(tmpdir))
+            files_orm = LocalFiles(Path(tmpdir))
+            db_orm = MDorm(files_orm)
 
             db_orm.create(Note, Note(title="note1", content="Content 1", tags="a"))
             db_orm.create(Note, Note(title="note2", content="Content 2", tags="b"))

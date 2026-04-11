@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 from typing import Annotated
 
-from mdorm import MarkdownModel, MDorm
+from mdorm import LocalFiles, MarkdownModel, MDorm
 from mdorm.fields import IntegerSpec, SectionSpec
 
 
@@ -24,7 +24,8 @@ class TestRegistration:
     def test_init_creates_table(self):
         """Verify MDorm() creates a table with correct columns."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             assert "SampleModel" in db.cache.metadata.tables
             table = db.cache.metadata.tables["SampleModel"]
@@ -40,7 +41,8 @@ class TestRegistration:
     def test_init_creates_table_with_section_fields(self):
         """Verify MDorm() creates columns for SectionSpec fields."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             assert "SampleModelWithSections" in db.cache.metadata.tables
             table = db.cache.metadata.tables["SampleModelWithSections"]
@@ -57,7 +59,8 @@ class TestRegistration:
     def test_table_is_usable(self):
         """Verify the created table can be used for insert/select."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
 
             obj = SampleModel(
                 title="test",
@@ -87,7 +90,8 @@ count: 99
 """
             )
 
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
             result = db.get_or_none(SampleModel, "item1")
             assert result is not None
             assert result.title == "item1"
@@ -112,7 +116,8 @@ These are my notes.
 """
             )
 
-            db = MDorm(Path(tmpdir))
+            files = LocalFiles(Path(tmpdir))
+            db = MDorm(files)
             result = db.get_or_none(SampleModelWithSections, "item1")
             assert result is not None
             assert result.title == "item1"
