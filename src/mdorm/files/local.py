@@ -4,14 +4,15 @@ from typing import Generator, TypeVar
 
 import frontmatter
 
-from .models import MarkdownModel
+from ..models import MarkdownModel
+from .generic import GenericFiles
 
 T = TypeVar("T", bound=MarkdownModel)
 
 SECTION_PATTERN = re.compile(r"(?:^## .+\n)?<!-- section: (\w+) -->", re.MULTILINE)
 
 
-class FileManager:
+class LocalFiles(GenericFiles):
 
     def __init__(self, models_dir: Path) -> None:
         if not models_dir.exists():

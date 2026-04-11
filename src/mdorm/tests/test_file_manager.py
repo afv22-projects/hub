@@ -6,7 +6,7 @@ import pytest
 
 from mdorm import MarkdownModel
 from mdorm.fields import BooleanSpec, RelationToOneSpec, SectionSpec
-from mdorm.file_manager import FileManager
+from mdorm.files.local import LocalFiles
 
 
 class Article(MarkdownModel):
@@ -32,18 +32,18 @@ class TestParseContent:
 
     def test_parse_empty_content(self):
         """Verify empty string returns empty content."""
-        result = FileManager._parse_content("")
+        result = LocalFiles._parse_content("")
         assert result == {"content": ""}
 
     def test_parse_body_only(self):
         """Verify content without sections goes to content."""
-        result = FileManager._parse_content("Just some text.")
+        result = LocalFiles._parse_content("Just some text.")
         assert result == {"content": "Just some text."}
 
     def test_parse_single_section(self):
         """Verify single section is parsed correctly."""
         content = "<!-- section: notes -->\nSome notes here."
-        result = FileManager._parse_content(content)
+        result = LocalFiles._parse_content(content)
         assert result["content"] == ""
         assert result["notes"] == "Some notes here."
 
@@ -54,7 +54,7 @@ First section.
 
 <!-- section: notes -->
 Second section."""
-        result = FileManager._parse_content(content)
+        result = LocalFiles._parse_content(content)
         assert result["content"] == ""
         assert result["summary"] == "First section."
         assert result["notes"] == "Second section."
@@ -65,7 +65,7 @@ Second section."""
 
 <!-- section: notes -->
 SectionSpec content."""
-        result = FileManager._parse_content(content)
+        result = LocalFiles._parse_content(content)
         assert result["content"] == "Preamble text."
         assert result["notes"] == "SectionSpec content."
 
@@ -77,7 +77,7 @@ Some **bold** text.
 
 ### Another header
 More content."""
-        result = FileManager._parse_content(content)
+        result = LocalFiles._parse_content(content)
         assert "## A Header" in result["notes"]
         assert "### Another header" in result["notes"]
         assert "**bold**" in result["notes"]
@@ -89,7 +89,7 @@ More content."""
   Content with whitespace
 
 """
-        result = FileManager._parse_content(content)
+        result = LocalFiles._parse_content(content)
         assert result["notes"] == "Content with whitespace"
 
 
@@ -103,7 +103,7 @@ class TestDumpContent:
             content="Hello world",
             draft=False,
         )
-        result = FileManager._dump_content(article)
+        result = LocalFiles._dump_content(article)
         assert result == "Hello world"
 
     def test_dump_with_sections(self):
@@ -114,7 +114,7 @@ class TestDumpContent:
             draft=False,
             notes="Some notes.",
         )
-        result = FileManager._dump_content(article)
+        result = LocalFiles._dump_content(article)
         assert "Preamble" in result
         assert "<!-- section: notes -->" in result
         assert "Some notes." in result
@@ -128,7 +128,7 @@ class TestDumpContent:
             summary="A summary.",
             notes="Some notes.",
         )
-        result = FileManager._dump_content(article)
+        result = LocalFiles._dump_content(article)
         assert "<!-- section: summary -->" in result
         assert "A summary." in result
         assert "<!-- section: notes -->" in result
@@ -136,7 +136,7 @@ class TestDumpContent:
 
 
 class TestSectionsRoundTrip:
-    """Tests for reading and writing sections through FileManager."""
+    """Tests for reading and writing sections through LocalFiles."""
 
     def test_read_file_with_sections(self):
         """Verify reading a file with section markers parses them into fields."""
@@ -160,7 +160,7 @@ Some notes.
 """
             )
 
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
             result = fm.read(ArticleWithSections, "post")
 
             assert result.content == "Introduction here."
@@ -171,7 +171,7 @@ Some notes.
     def test_write_file_with_sections(self):
         """Verify writing a model with section fields creates proper markers."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             article = ArticleWithSections(
                 title="new",
@@ -189,7 +189,7 @@ Some notes.
     def test_sections_roundtrip(self):
         """Verify section fields survive a write then read cycle."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             original = ArticleWithSections(
                 title="roundtrip",
@@ -222,7 +222,7 @@ Just body content.
 """
             )
 
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
             result = fm.read(ArticleWithSections, "post")
 
             assert result.content == "Just body content."
@@ -246,7 +246,7 @@ This is the body.
 """
             )
 
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
             result = fm.read(Article, "post")
 
             assert result.title == "post"
@@ -256,7 +256,7 @@ This is the body.
     def test_read_nonexistent_raises(self):
         """Verify read() raises FileNotFoundError for missing file."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             with pytest.raises(FileNotFoundError):
                 fm.read(Article, "missing")
@@ -266,7 +266,7 @@ class TestWrite:
     def test_write_creates_file(self):
         """Verify write() creates a new markdown file."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             article = Article(title="new", content="Body text", draft=False)
             fm.write(article)
@@ -293,7 +293,7 @@ Old content
 """
             )
 
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
             updated = Article(
                 title="existing",
                 content="New content",
@@ -309,7 +309,7 @@ Old content
     def test_write_excludes_section_fields_from_frontmatter(self):
         """Verify section fields are not written to YAML frontmatter."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             article = ArticleWithSections(
                 title="new",
@@ -346,7 +346,7 @@ draft: false
 """
             )
 
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
             fm.delete(Article, "to_delete")
 
             assert not file_path.exists()
@@ -354,7 +354,7 @@ draft: false
     def test_delete_nonexistent_raises(self):
         """Verify delete() raises FileNotFoundError for missing file."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             with pytest.raises(FileNotFoundError):
                 fm.delete(Article, "missing")
@@ -378,7 +378,7 @@ A delicious pasta recipe.
 """
             )
 
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
             result = fm.read(Recipe, "pasta")
 
             assert result.author == "John Smith"
@@ -398,7 +398,7 @@ Content.
 """
             )
 
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
             with pytest.raises(ValueError) as exc_info:
                 fm.read(Recipe, "pasta")
 
@@ -419,7 +419,7 @@ No author specified.
 """
             )
 
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
             # This should raise a validation error from Pydantic
             # since author is required (no default)
             with pytest.raises(Exception):
@@ -428,7 +428,7 @@ No author specified.
     def test_write_serializes_wiki_link(self):
         """Verify write() converts title to wiki link format."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             recipe = Recipe(
                 title="pasta",
@@ -445,7 +445,7 @@ No author specified.
     def test_write_then_read_roundtrip(self):
         """Verify write then read preserves the relation field."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             recipe = Recipe(
                 title="soup",
@@ -461,7 +461,7 @@ No author specified.
     def test_write_overwrites_relation_field(self):
         """Verify write() updates relation field in existing file."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            fm = FileManager(Path(tmpdir))
+            fm = LocalFiles(Path(tmpdir))
 
             # Create initial recipe
             recipe = Recipe(

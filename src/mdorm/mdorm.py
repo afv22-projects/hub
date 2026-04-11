@@ -1,9 +1,8 @@
 import logging
-from pathlib import Path
 from typing import TypeVar
 
 from .cache import Cache, Filter
-from .file_manager import FileManager
+from .files.local import GenericFiles
 from .models import MarkdownModel, RequestBase
 
 T = TypeVar("T", bound=MarkdownModel)
@@ -12,12 +11,12 @@ T = TypeVar("T", bound=MarkdownModel)
 class MDorm:
     def __init__(
         self,
-        models_dir: Path,
+        files: GenericFiles,
         db_url: str = "sqlite://",
         lazy_load: bool = False,
         logger: logging.Logger | None = None,
     ):
-        self.files = FileManager(models_dir)
+        self.files = files
         self.cache = Cache(db_url, logger=logger)
 
         # Load existing objects into db

@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from mdorm import MDorm
+from mdorm import MDorm, LocalFiles
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ def init_db(models_dir: Path, db_url: str) -> None:
         logger.debug("MDorm already initialized, skipping")
         return
 
-    logger.info(f"Initializing pantry_v2 db: models_dir={models_dir}, db_url={db_url}")
+    logger.info(f"Initializing pantry MDorm: models_dir={models_dir}, db_url={db_url}")
 
     try:
         from .models import Consumable, Ingredient, Recipe
@@ -24,7 +24,11 @@ def init_db(models_dir: Path, db_url: str) -> None:
         raise
 
     try:
-        mdorm = MDorm(models_dir, db_url, logger=logger)
+        mdorm = MDorm(
+            LocalFiles(models_dir),
+            db_url,
+            logger=logger,
+        )
         logger.info("pantry_v2 db initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize MDorm: {e}")
