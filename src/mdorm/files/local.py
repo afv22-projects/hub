@@ -21,12 +21,6 @@ class LocalFiles(GenericFiles):
         file = self.models_dir / Model.__name__ / (title + ".md")
         return file.exists()
 
-    def get_mtime(self, Model: type[T], title: str) -> float | None:
-        file = self.models_dir / Model.__name__ / (title + ".md")
-        if not file.exists():
-            return None
-        return file.stat().st_mtime
-
     def read(self, Model: type[T], title: str) -> T:
         file = self.models_dir / Model.__name__ / (title + ".md")
         if not file.exists():

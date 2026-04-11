@@ -2,7 +2,7 @@ import logging
 from typing import TypeVar
 
 from .cache import Cache, Filter
-from .files import GenericFiles, File
+from .files import GenericFiles
 from .models import MarkdownModel, RequestBase
 
 T = TypeVar("T", bound=MarkdownModel)
@@ -13,46 +13,39 @@ class MDorm:
         self,
         files: GenericFiles,
         db_url: str = "sqlite://",
-        lazy_load: bool = False,
         logger: logging.Logger | None = None,
     ):
         self.files = files
         self.cache = Cache(db_url, logger=logger)
+        self.sync()
 
-        # Load existing objects into db
-        if not lazy_load:
-            for Model in MarkdownModel._registry.values():
-                self._sync(Model)
-
-    def _sync(self, Model: type[T]) -> list[File]:
+    def _sync_model(self, Model: type[T]) -> None:
         current_files = self.files.list_files(Model)
         current_titles = set(f.title for f in current_files)
-        cached_titles = set(obj.title for obj in self.cache.get_rows(Model))
+        cached_objs = {obj.title: obj for obj in self.cache.get_rows(Model)}
 
-        for title in current_titles - cached_titles:
+        # Create new files
+        for title in current_titles - cached_objs.keys():
             obj = self.files.read(Model, title)
             self.cache.create(obj)
 
-        for title in cached_titles - current_titles:
+        # Delete removed files
+        for title in cached_objs.keys() - current_titles:
             self.cache.delete(Model, title)
 
-        return current_files
+        # Update stale files
+        for f in current_files:
+            cached = cached_objs.get(f.title)
+            if cached and cached.mtime < f.mtime:
+                obj = self.files.read(Model, f.title)
+                self.cache.upsert(obj)
+
+    def sync(self):
+        for Model in MarkdownModel._registry.values():
+            self._sync_model(Model)
 
     def get_or_none(self, Model: type[T], title: str) -> T | None:
-        current_mtime = self.files.get_mtime(Model, title)
-        cached_obj = self.cache.get_row(Model, title)
-
-        if not current_mtime:
-            if cached_obj:
-                self.cache.delete(Model, title)
-            return None
-
-        if not cached_obj or cached_obj.mtime < current_mtime:
-            obj = self.files.read(Model, title)
-            self.cache.upsert(obj)
-            return obj
-
-        return cached_obj
+        return self.cache.get_row(Model, title)
 
     def get(self, Model: type[T], title: str) -> T:
         obj = self.get_or_none(Model, title)
@@ -61,18 +54,7 @@ class MDorm:
         return obj
 
     def query(self, Model: type[T], filter: Filter | None = None) -> list[T]:
-        current_files = {f.title: f.mtime for f in self._sync(Model)}
-        cached_objs = self.cache.get_rows(Model, filter)
-        result: list[T] = []
-
-        for obj in cached_objs:
-            if obj.mtime < current_files[obj.title]:
-                obj = self.files.read(Model, obj.title)
-                self.cache.upsert(obj)
-
-            result.append(obj)
-
-        return result
+        return self.cache.get_rows(Model, filter)
 
     def query_by_relation(
         self, Model: type[T], field: str, target_title: str
@@ -81,7 +63,7 @@ class MDorm:
         return self.query(Model, filter=getattr(table.c, field).contains(target_title))
 
     def create(self, Model: type[T], obj: RequestBase | T) -> T:
-        if self.files.exists(Model, obj.title):
+        if self.cache.get_row(Model, obj.title):
             raise FileExistsError()
         if isinstance(obj, RequestBase):
             obj = Model(**obj.model_dump())
@@ -91,7 +73,7 @@ class MDorm:
         return obj
 
     def update(self, Model: type[T], obj: RequestBase | T) -> T:
-        if not self.files.exists(Model, obj.title):
+        if not self.cache.get_row(Model, obj.title):
             raise FileNotFoundError()
         if isinstance(obj, RequestBase):
             obj = Model(**obj.model_dump())

@@ -34,15 +34,6 @@ class DropboxFiles(GenericFiles):
         except Exception:
             return False
 
-    def get_mtime(self, Model: type[T], title: str) -> float | None:
-        try:
-            metadata = self.dbx.files_get_metadata(self._get_path(Model, title))
-            if isinstance(metadata, FileMetadata):
-                return metadata.server_modified.timestamp()
-            return None
-        except Exception:
-            return None
-
     def read(self, Model: type[T], title: str) -> T:
         path = self._get_path(Model, title)
         metadata, response = self.dbx.files_download(path)  # type: ignore[misc]

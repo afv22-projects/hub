@@ -72,9 +72,6 @@ class GenericFiles(ABC):
     def exists(self, Model: type[T], title: str) -> bool: ...
 
     @abstractmethod
-    def get_mtime(self, Model: type[T], title: str) -> float | None: ...
-
-    @abstractmethod
     def read(self, Model: type[T], title: str) -> T: ...
 
     @abstractmethod
