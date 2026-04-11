@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Generator, TypeVar
+from typing import TypeVar
 
 import frontmatter
 
@@ -17,33 +17,6 @@ class LocalFiles(GenericFiles):
 
         self.models_dir = models_dir
 
-    def _load_file(self, Model: type[T], file: Path) -> T:
-        """Load a model instance from a markdown file."""
-        post = frontmatter.load(str(file))
-        specs = Model.get_field_specs()
-        body_sections = self._parse_content(post.content)
-
-        field_values = {}
-        for name, spec in specs.items():
-            if spec.in_body:
-                raw = body_sections.get(name, "")
-            else:
-                raw = post.metadata.get(name)
-                if raw is None:
-                    continue
-            field_values[name] = spec.deserialize(raw, name)
-
-        # Get frontmatter fields that don't have specs (shouldn't happen, but safe)
-        metadata = {k: v for k, v in post.metadata.items() if k not in specs}
-
-        return Model(
-            **metadata,
-            **field_values,
-            title=file.stem,
-            content=body_sections["content"],
-            mtime=file.stat().st_mtime,
-        )
-
     def exists(self, Model: type[T], title: str) -> bool:
         file = self.models_dir / Model.__name__ / (title + ".md")
         return file.exists()
@@ -58,7 +31,13 @@ class LocalFiles(GenericFiles):
         file = self.models_dir / Model.__name__ / (title + ".md")
         if not file.exists():
             raise FileNotFoundError()
-        return self._load_file(Model, file)
+
+        return self._load_object(
+            Model,
+            frontmatter.load(str(file)),
+            file.stem,
+            file.stat().st_mtime,
+        )
 
     def list_titles(self, Model: type[T]) -> list[str]:
         model_dir = self.models_dir / Model.__name__
@@ -74,15 +53,7 @@ class LocalFiles(GenericFiles):
         file = model_dir / (obj.title + ".md")
         file.touch(exist_ok=True)
 
-        # Serialize frontmatter fields
-        fm_fields = {}
-        for name, spec in obj.__class__.get_field_specs().items():
-            if spec.in_body:
-                continue
-            value = getattr(obj, name)
-            fm_fields[name] = spec.serialize(value, name)
-
-        post = frontmatter.Post(self._dump_content(obj), **fm_fields)
+        post = self._dump_object(obj)
         file.write_text(frontmatter.dumps(post))
         return file.stat().st_mtime
 
