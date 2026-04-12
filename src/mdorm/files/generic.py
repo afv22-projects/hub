@@ -12,7 +12,7 @@ SECTION_PATTERN = re.compile(r"(?:^## .+\n)?<!-- section: (\w+) -->", re.MULTILI
 
 
 @dataclass
-class File:
+class MetaFile:
     title: str
     mtime: float
 

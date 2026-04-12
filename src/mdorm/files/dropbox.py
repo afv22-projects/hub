@@ -6,7 +6,7 @@ from dropbox.exceptions import ApiError
 from dropbox.files import FileMetadata, ListFolderResult, WriteMode
 
 from mdorm.models.markdown_model import MarkdownModel
-from .generic import GenericFiles, File
+from .generic import GenericFiles, MetaFile
 
 T = TypeVar("T", bound=MarkdownModel)
 
@@ -42,20 +42,20 @@ class DropboxFiles(GenericFiles):
         mtime = metadata.server_modified.timestamp()
         return self._load_object(Model, post, title, mtime)
 
-    def list_files(self, Model: type[T]) -> list[File]:
+    def list_files(self, Model: type[T]) -> list[MetaFile]:
         dir_path = self._get_dir_path(Model)
         try:
             result: ListFolderResult = self.dbx.files_list_folder(dir_path)  # type: ignore[assignment]
         except ApiError:
             return []
 
-        files: list[File] = []
+        files: list[MetaFile] = []
         while True:
             for entry in result.entries:
                 if isinstance(entry, FileMetadata) and entry.name.endswith(".md"):
                     title = entry.name[:-3]  # Remove .md extension
                     mtime = entry.server_modified.timestamp()
-                    files.append(File(title=title, mtime=mtime))
+                    files.append(MetaFile(title=title, mtime=mtime))
 
             if not result.has_more:
                 break

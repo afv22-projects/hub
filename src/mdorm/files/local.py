@@ -4,7 +4,7 @@ from typing import TypeVar
 import frontmatter
 
 from ..models import MarkdownModel
-from .generic import GenericFiles, File
+from .generic import GenericFiles, MetaFile
 
 T = TypeVar("T", bound=MarkdownModel)
 
@@ -33,13 +33,13 @@ class LocalFiles(GenericFiles):
             file.stat().st_mtime,
         )
 
-    def list_files(self, Model: type[T]) -> list[File]:
+    def list_files(self, Model: type[T]) -> list[MetaFile]:
         model_dir = self.models_dir / Model.__name__
         if not model_dir.is_dir():
             return []
 
         return [
-            File(title=path.stem, mtime=path.stat().st_mtime)
+            MetaFile(title=path.stem, mtime=path.stat().st_mtime)
             for path in model_dir.iterdir()
         ]
 

@@ -1,4 +1,4 @@
-# MDorm - Save your data to md files
+# MDorm - A markdown-native ORM for apps that outlive their infrastructure
 
 This is a framework that persists objects in markdown files to ensure it stays human readable outside the app.
 
